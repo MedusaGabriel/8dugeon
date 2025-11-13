@@ -8,6 +8,7 @@ import {
   getActorName,
   gainXP,
 } from './actions'
+import { selectEnemyAttack, getEnemyStrategy } from './enemyAI'
 
 export function createBattle(player: Player, enemy: Creature): BattleState {
   return {
@@ -125,25 +126,46 @@ export function playerAttack(battle: BattleState, attack: Attack): BattleState {
 }
 
 export function enemyTurn(battle: BattleState): BattleState {
-  if (!battle.isActive || battle.turn !== 'enemy') {
+  console.log('🤖 Enemy Turn - Starting', {
+    isActive: battle.isActive,
+    turn: battle.turn,
+    enemyName: battle.enemy.name,
+    enemyHp: battle.enemy.stats.hp,
+  })
+
+  if (!battle.isActive) {
+    console.log('❌ Battle not active')
     return battle
   }
 
-  // IA simples: escolhe ataque aleatório que possa usar
-  const availableAttacks = battle.enemy.attacks.filter((atk) => canUseAttack(battle.enemy, atk))
+  if (battle.turn !== 'enemy') {
+    console.log('❌ Not enemy turn:', battle.turn)
+    return battle
+  }
 
-  if (availableAttacks.length === 0) {
+  // Determina estratégia da IA baseada na criatura
+  const strategy = getEnemyStrategy(battle.enemy)
+  console.log('🎯 Strategy:', strategy)
+
+  // Seleciona o ataque usando IA
+  const attack = selectEnemyAttack(battle.enemy, battle.player, strategy)
+
+  if (!attack) {
+    console.log('⚠️ No available attacks')
     addBattleLog(battle, `${battle.enemy.name} não pode atacar!`, 'info', 'enemy')
     battle.turn = 'player'
     battle.round++
     return battle
   }
 
-  const attack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)]
+  console.log('⚔️ Selected attack:', attack.name)
 
+  // Usa o ataque
   useAttack(battle.enemy, attack)
 
+  // Executa o ataque
   const result = executeAttack(battle.enemy, battle.player, attack)
+  console.log('💥 Attack result:', result)
 
   addBattleLog(battle, result.message, 'attack', 'enemy')
 
@@ -156,13 +178,19 @@ export function enemyTurn(battle: BattleState): BattleState {
 
   // Verifica se o player foi derrotado
   if (isDefeated(battle.player)) {
+    console.log('💀 Player defeated')
     battle.isActive = false
     battle.result = 'defeat'
     addBattleLog(battle, 'Você foi derrotado...', 'info', 'player')
     return battle
   }
 
+  // Aplica efeitos de status no inimigo
+  const statusLogs = applyStatusEffects(battle.enemy)
+  statusLogs.forEach((log) => battle.battleLog.push(log))
+
   // Passa o turno para o player
+  console.log('✅ Ending enemy turn, switching to player')
   battle.turn = 'player'
   battle.round++
 

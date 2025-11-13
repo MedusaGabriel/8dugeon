@@ -97,28 +97,30 @@ export function executeAttack(
 export function applyStatusEffects(entity: Player | Creature): BattleLogEntry[] {
   const logs: BattleLogEntry[] = []
 
-  if (!('class' in entity)) return logs // Só players têm status effects por enquanto
+  // Verifica se é player ou criatura
+  const isPlayer = 'class' in entity
 
-  const player = entity as Player
+  if (isPlayer) {
+    const player = entity as Player
+    player.statusEffects.forEach((effect) => {
+      if (effect.stat === 'hp') {
+        player.currentStats.hp = Math.max(0, player.currentStats.hp + effect.value)
+        logs.push({
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          message: `${player.name} perdeu ${Math.abs(effect.value)} HP de ${effect.name}`,
+          type: 'damage',
+          actor: 'player',
+        })
+      }
 
-  player.statusEffects.forEach((effect) => {
-    if (effect.stat === 'hp') {
-      player.currentStats.hp = Math.max(0, player.currentStats.hp + effect.value)
-      logs.push({
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        message: `${player.name} perdeu ${Math.abs(effect.value)} HP de ${effect.name}`,
-        type: 'damage',
-        actor: 'player',
-      })
-    }
+      // Reduz duração
+      effect.duration--
+    })
 
-    // Reduz duração
-    effect.duration--
-  })
-
-  // Remove efeitos expirados
-  player.statusEffects = player.statusEffects.filter((e) => e.duration > 0)
+    // Remove efeitos expirados
+    player.statusEffects = player.statusEffects.filter((e) => e.duration > 0)
+  }
 
   return logs
 }
