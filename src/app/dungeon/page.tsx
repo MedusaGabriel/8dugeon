@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import {
   Container,
   Paper,
@@ -17,14 +18,32 @@ import {
 } from '@mui/material'
 import { useGameStore } from '@/store/gameStore'
 import { useRouter } from 'next/navigation'
-import DungeonView from '@/components/game/DungeonView'
-import StatusBar from '@/components/game/StatusBar'
-import BattleLog from '@/components/game/BattleLog'
-import ActionButtons from '@/components/game/ActionButtons'
 import Button from '@/components/ui/Button'
 import { PlayerClass, Attack } from '@/types/game'
 import { playerAttack, enemyTurn, attemptFlee } from '@/lib/game/battleEngine'
 import Link from 'next/link'
+
+// Lazy load dos componentes pesados do jogo
+const DungeonView = dynamic(() => import('@/components/game/DungeonView'), {
+  loading: () => (
+    <Box className="h-64 flex items-center justify-center text-white">Carregando masmorra...</Box>
+  ),
+})
+const StatusBar = dynamic(() => import('@/components/game/StatusBar'), {
+  loading: () => (
+    <Box className="h-32 flex items-center justify-center text-white">Carregando status...</Box>
+  ),
+})
+const BattleLog = dynamic(() => import('@/components/game/BattleLog'), {
+  loading: () => (
+    <Box className="h-64 flex items-center justify-center text-white">Carregando log...</Box>
+  ),
+})
+const ActionButtons = dynamic(() => import('@/components/game/ActionButtons'), {
+  loading: () => (
+    <Box className="h-32 flex items-center justify-center text-white">Carregando ações...</Box>
+  ),
+})
 
 export default function DungeonPage() {
   const router = useRouter()
@@ -53,37 +72,23 @@ export default function DungeonPage() {
   }
 
   const handleAttack = (attack: Attack) => {
-    if (!battle || !player) return
+    if (!battle || !player || battle.turn !== 'player') return
 
-    let newBattle = playerAttack(battle, attack)
+    const newBattle = playerAttack(battle, attack)
     setBattle(newBattle)
 
-    if (newBattle.isActive && newBattle.turn === 'enemy') {
-      setTimeout(() => {
-        newBattle = enemyTurn(newBattle)
-        setBattle(newBattle)
-
-        if (!newBattle.isActive) {
-          setTimeout(() => endBattle(), 2000)
-        }
-      }, 1000)
-    } else if (!newBattle.isActive) {
+    if (!newBattle.isActive) {
       setTimeout(() => endBattle(), 2000)
     }
   }
 
   const handleFlee = () => {
-    if (!battle) return
+    if (!battle || battle.turn !== 'player') return
     const newBattle = attemptFlee(battle)
     setBattle(newBattle)
 
     if (!newBattle.isActive) {
       setTimeout(() => endBattle(), 1500)
-    } else if (newBattle.turn === 'enemy') {
-      setTimeout(() => {
-        const afterFlee = enemyTurn(newBattle)
-        setBattle(afterFlee)
-      }, 1000)
     }
   }
 

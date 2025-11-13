@@ -125,7 +125,7 @@ export function playerAttack(battle: BattleState, attack: Attack): BattleState {
 }
 
 export function enemyTurn(battle: BattleState): BattleState {
-  if (!battle.isActive || battle.turn !== 'player') {
+  if (!battle.isActive || battle.turn !== 'enemy') {
     return battle
   }
 

@@ -1,11 +1,23 @@
 'use client'
-import { Container, Paper, Typography, Grid, Box, Chip } from '@mui/material'
+import {
+  Container,
+  Paper,
+  Typography,
+  Grid,
+  Box,
+  Chip,
+  Card,
+  CardContent,
+  CardActions,
+} from '@mui/material'
+import { useMemo } from 'react'
 import Link from 'next/link'
-import { creatures } from '@/data/creatures'
-import { Card, CardContent, CardActions } from '@mui/material'
 import Button from '@/components/ui/Button'
+import { Creature } from '@/types/game'
 
 export default function CreaturesPage() {
+  // Lazy load dos dados
+  const creatures = useMemo(() => require('@/data/creatures').creatures, [])
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'beast':
@@ -35,7 +47,7 @@ export default function CreaturesPage() {
           </Typography>
 
           <Grid container spacing={3}>
-            {creatures.map((creature) => (
+            {creatures.map((creature: Creature) => (
               <Grid item xs={12} sm={6} md={4} key={creature.id}>
                 <Card
                   sx={{

@@ -1,11 +1,23 @@
 'use client'
-import { Container, Paper, Typography, Grid, Box, Chip } from '@mui/material'
+import {
+  Container,
+  Paper,
+  Typography,
+  Grid,
+  Box,
+  Chip,
+  Card,
+  CardContent,
+  CardActions,
+} from '@mui/material'
+import { useMemo } from 'react'
 import Link from 'next/link'
-import { classes } from '@/data/classes'
-import { Card, CardContent, CardActions } from '@mui/material'
 import Button from '@/components/ui/Button'
+import { ClassData } from '@/types/game'
 
 export default function ClassesPage() {
+  // Lazy load dos dados
+  const classes = useMemo(() => require('@/data/classes').classes, [])
   return (
     <main className="min-h-screen py-12">
       <Container maxWidth="lg">
@@ -18,7 +30,7 @@ export default function ClassesPage() {
           </Typography>
 
           <Grid container spacing={3}>
-            {classes.map((classData) => (
+            {classes.map((classData: ClassData) => (
               <Grid item xs={12} sm={6} md={4} key={classData.id}>
                 <Card
                   sx={{

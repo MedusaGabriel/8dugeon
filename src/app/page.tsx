@@ -1,8 +1,14 @@
 'use client'
 import { Container, Paper, Typography, Box, Grid } from '@mui/material'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
-import { Castle, SportsEsports, Book, Group } from '@mui/icons-material'
+
+// Lazy load dos ícones
+const Castle = dynamic(() => import('@mui/icons-material/Castle'))
+const SportsEsports = dynamic(() => import('@mui/icons-material/SportsEsports'))
+const Book = dynamic(() => import('@mui/icons-material/Book'))
+const Group = dynamic(() => import('@mui/icons-material/Group'))
 
 export default function Home() {
   return (
