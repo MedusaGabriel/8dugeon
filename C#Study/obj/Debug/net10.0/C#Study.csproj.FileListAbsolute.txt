@@ -1,0 +1,15 @@
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.AssemblyInfoInputs.cache
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.AssemblyInfo.cs
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.csproj.CoreCompileInputs.cache
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.sourcelink.json
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\bin\Debug\net10.0\C#Study.exe
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\bin\Debug\net10.0\C#Study.deps.json
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\bin\Debug\net10.0\C#Study.runtimeconfig.json
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\bin\Debug\net10.0\C#Study.dll
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\bin\Debug\net10.0\C#Study.pdb
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.dll
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\refint\C#Study.dll
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.pdb
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\C#Study.genruntimeconfig.cache
+C:\Users\Medusa\Documents\GitHub\8dugeon\C#Study\obj\Debug\net10.0\ref\C#Study.dll
