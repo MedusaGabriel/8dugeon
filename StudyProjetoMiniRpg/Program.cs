@@ -1,5 +1,4 @@
-﻿Console.WriteLine("8dugeon MiniRpg - Study");
-
+﻿
 static Hero HeroiPlayer()
 {
     Console.WriteLine("Digite o nome do seu heroi:");
@@ -23,27 +22,56 @@ static Hero HeroiPlayer()
 
     if (HeroiClasse == "guerreiro")
     {
-        player = new Hero(HeroiNome, HeroiClasse, 150, 20, 40);
+        player = new Hero(HeroiNome, HeroiClasse, 150, 15, 10);
     }
     else if (HeroiClasse == "mago")
     {
-        player = new Hero(HeroiNome, HeroiClasse, 100, 40, 20);
+        player = new Hero(HeroiNome, HeroiClasse, 100, 20, 3);
     }
     else if (HeroiClasse == "arqueiro")
     {
-        player = new Hero(HeroiNome, HeroiClasse, 100, 50, 10);
+        player = new Hero(HeroiNome, HeroiClasse, 100, 22, 4);
     }
     else
     {
-        player = new Hero(HeroiNome, HeroiClasse, 100, 15, 15);
+        player = new Hero(HeroiNome, HeroiClasse, 50, 15, 5);
     }
     return player;
 }
+
+Enemy slime = new Enemy ("Slime", 50, 10, 2);
+
+static void Batalha(Hero heroi, Enemy inimigo)
+{
+    while (heroi.hp > 0 && inimigo.hp > 0)
+    {
+        inimigo.Atacar(heroi);
+        if (heroi.hp <= 0)
+        {
+            Console.WriteLine("Heroi foi derrotado!");
+            break;
+        }
+        Console.WriteLine();
+        Console.WriteLine("Aperte ENTER para o herói atacar...");
+        Console.ReadLine();
+
+        heroi.Atacar(inimigo);
+        if(inimigo.hp <=0)
+        {
+            Console.WriteLine("O Inimigo foi derrotado!");
+            break;
+        }
+        Console.WriteLine("Próximo turno.. Aperte ENTER pra continuar!");
+        Console.ReadLine();
+    }
+}
+
+
 Hero heroi = HeroiPlayer();
-Console.WriteLine($"Nome: {heroi.nome}");
-Console.WriteLine ($"Classe: {heroi.classe}");
-Console.WriteLine ($"HP: {heroi.hp}");
-Console.WriteLine ($"Ataque: {heroi.ataque}");
-Console.WriteLine ($"Defesa: {heroi.defesa}");
+Console.WriteLine($"Nome do Heroi: {heroi.nome} Classe do Heroi: {heroi.classe} Seu HP: {heroi.hp} Seu Ataque: {heroi.ataque} Sua Defesa: {heroi.defesa}");
+Console.WriteLine($"Um Inimigo: {slime.nome}  Hp: {slime.hp}  Ataque: {slime.ataque} Defesa: {slime.defesa}");
+Batalha(heroi, slime);
+
+
 
 

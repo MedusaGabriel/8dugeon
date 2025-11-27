@@ -15,24 +15,33 @@ public class Hero
         this.defesa = defesa;
     }
 
-    public void Atacar()
+    public void Atacar(Enemy inimigo)
     {
         Console.WriteLine ($"O {nome} Atacou");
-
+        inimigo.TomarDano(ataque);
     }
     public void TomarDano(int dano)
     {
-        int DanoRecebido = dano - defesa;
-        if  (DanoRecebido > 0)
+        double defesaDecimal = defesa / 100.0;
+        double danoBruto = dano * (1 - defesaDecimal);
+        int danoRecebido = (int)danoBruto;
+        if (danoRecebido <= 0)
         {
-            hp -= DanoRecebido;
-            Console.WriteLine ($"O Heroi {nome} tomou {DanoRecebido} de dano e agora tem {hp} de HP.");
+            Console.WriteLine($"O herói {nome} não tomou dano devido á sua defesa.");
+            return;
+        }
+
+        hp -= danoRecebido;
+
+        if( hp > 0)
+        {
+            Console.WriteLine ($"O herói {nome} tomou {danoRecebido} de dano e agora tem {hp} de HP");
         }
         else
         {
-            Console.WriteLine ($"O Heroi {nome} não tomou dano devido à sua defesa.");
+            hp = 0;
+            Console.WriteLine ($"Fim da jornada do heroi {nome} morreu em batalhar.");
         }
-        
     }
 
 }
