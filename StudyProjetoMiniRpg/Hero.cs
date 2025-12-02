@@ -1,3 +1,5 @@
+using System;
+
 public class Hero
 {
     public string nome;
@@ -15,6 +17,43 @@ public class Hero
         this.defesa = defesa;
     }
 
+    public static Hero CriarHeroi()
+    {
+        Console.WriteLine("Digite o nome do seu heroi: ");
+        string? inputNome = Console.ReadLine();
+        while (string.IsNullOrWhiteSpace(inputNome))
+        {
+            Console.WriteLine("Vocêo não pode deixa o nome do seu heroi vazio! escreva de novo");
+            Console.WriteLine();
+            inputNome = Console.ReadLine();
+        }
+        string heroiNome = inputNome;
+
+        Console.WriteLine("Digite a calsse do seu heroi: (que tal Guerreiro? Mago? Arqueiro? ou Algo diferente...)");
+        string? inputClasse = Console.ReadLine();
+        while (string.IsNullOrWhiteSpace(inputClasse))
+        {
+            Console.Write("Você e Burro? já falei que não pode deixa em branco! ");
+            Console.WriteLine();
+            inputClasse = Console.ReadLine();
+        }
+
+        string heroiClasse = inputClasse.Trim();
+        if (!HeroClassConfig.Classes.TryGetValue(heroiClasse, out HeroClassStats? stats))
+        {
+            Console.WriteLine($"Classe '{heroiClasse}'... estranho... mas tudo bem, vou te dar algumas estatisticas.");
+            Console.WriteLine();
+            stats = HeroClassConfig.DefaultClassStats;
+        }
+        Hero player = new Hero(
+            heroiNome,
+            heroiClasse,
+            stats.Hp,
+            stats.Ataque,
+            stats.Defesa
+        );
+        return player;
+    }
     public void Atacar(Enemy inimigo)
     {
         Console.WriteLine ($"O {nome} Atacou");
