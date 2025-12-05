@@ -1,38 +1,13 @@
 ﻿using System;
 
-
-Enemy Slime = CriarInimigo();
+Enemy Inimigo = EnemyFactory.CriarInimigoAleatorio();
 Hero Heroi = Hero.CriarHeroi();
 
-VerStatus(Heroi, Slime);
-Batalha(Heroi, Slime);
-
-// --------- Funções ---------
-
-// Função para criar o herói
-
-
-// Mostra Status 
-static void VerStatus(Hero heroi, Enemy inimigo)
-{
-    Console.WriteLine();
-    Console.WriteLine("Status do seu Heroi!");
-    Console.WriteLine($"Nome do Heroi: {heroi.nome} | Classe do Heroi: {heroi.classe} | HP: {heroi.hp} | Ataque: {heroi.ataque} | Defesa: {heroi.defesa}");
-
-    Console.WriteLine();
-    Console.WriteLine("Status do seu Inimigo!");
-    Console.WriteLine($"Inimigo: {inimigo.nome} | HP: {inimigo.hp} | Ataque: {inimigo.ataque} | Defesa: {inimigo.defesa}");
-}
-
-// Criar Inimigo
-
-static Enemy CriarInimigo()
-{
-    return new Enemy("Slime", 50, 10, 2);
-}
+Batalha(Heroi, Inimigo);
 
 // Lê ação do jogador 
 // Futuramente vai ter um novo arquivo so pra essas funções de ler ação
+//Por enquanto vai fica aqui em program.cs
 static AcaoJogador LerAcaoJogador()
 {
     while (true)
@@ -65,12 +40,16 @@ static AcaoJogador LerAcaoJogador()
         {
             return AcaoJogador.Fugir;
         }
+        if (ContemQualquer(texto, new[] { "analis", "examinar", "observar", "info", "informação" }))
+        {
+            return AcaoJogador.Analisar;
+        }
+
 
         Console.WriteLine("Não entendi sua intenção. Tente algo como: 'quero atacar', 'vou defender', 'quero fugir'.");
     }
 }
 
-// verifica se o texto contém qualquer uma das palavras-chaves
 static bool ContemQualquer(string texto, string[] chaves)
 {
     foreach (string chave in chaves)
@@ -88,16 +67,19 @@ static bool ContemQualquer(string texto, string[] chaves)
 static void Batalha (Hero heroi, Enemy inimigo)
 {
     Console.WriteLine();
-    Console.WriteLine($"Um {inimigo.nome} apareceu na sua frente!");
+    Console.WriteLine($"Um {inimigo.Nome} apareceu na sua frente!");
     Console.WriteLine();
 
     Random rng = new Random();
-    while (heroi.hp > 0 && inimigo.hp > 0)
+
+    while (heroi.hp > 0 && inimigo.Hp > 0)
     {
         Console.WriteLine();
-        Console.WriteLine($"Hp do Herói: {heroi.hp} | Hp do Inimigo: {inimigo.hp}");
+        Console.WriteLine($"A sua vida é atual e: {heroi.hp}");
         Console.WriteLine();
-        Console.WriteLine($"{inimigo.nome} lhe viu e esta se preparando para lhe atacar, Slime possui tentanculos pegajoso que causa dano em contato!");
+        Console.WriteLine($"Descrição: {inimigo.Descricao}");
+        Console.WriteLine();
+        Console.WriteLine($"{inimigo.Nome} lhe viu e esta se preparando para lhe atacar");
         Console.WriteLine();
 
         AcaoJogador acao = LerAcaoJogador();
@@ -111,15 +93,15 @@ static void Batalha (Hero heroi, Enemy inimigo)
 
                 heroi.Atacar(inimigo);
 
-                if (inimigo.hp <= 0)
+                if (inimigo.Hp <= 0)
                 {
-                    Console.WriteLine($"O inimigo {inimigo.nome} antes que ele atacasse!");
+                    Console.WriteLine($"O inimigo {inimigo.Nome} antes que ele atacasse!");
                     return;
                 }
 
-                Console.WriteLine($"{inimigo.nome} ainda consegue desferir um golpe!");
+                Console.WriteLine($"{inimigo.Nome} ainda consegue desferir um golpe!");
                 Console.WriteLine();
-                heroi.TomarDano(inimigo.ataque);
+                heroi.TomarDano(inimigo.Ataque);
 
                 if (heroi.hp <= 0)
                 {
@@ -135,13 +117,13 @@ static void Batalha (Hero heroi, Enemy inimigo)
                 if (rolagem < 50)
                 {
                     Console.WriteLine("Você foi rápido o suficiente! Sua defesa Reduz o dano pela metade!");
-                    int danoReduzido = inimigo.ataque /2;
+                    int danoReduzido = inimigo.Ataque /2;
                     heroi.TomarDano(danoReduzido);
                 }
                 else
                 {
                     Console.WriteLine("Você foi lento demais! Não conseguiu se defender a tempo.");
-                    heroi.TomarDano(inimigo.ataque);
+                    heroi.TomarDano(inimigo.Ataque);
                 }
             
 
@@ -151,7 +133,25 @@ static void Batalha (Hero heroi, Enemy inimigo)
                     return;
                 }
                 break;
+                
+                case AcaoJogador.Analisar:
+                Console.WriteLine();
+                if (!inimigo.Revelado)
+                {
+                    Console.WriteLine($"Um olho inter-temporal apareceu em sua mente revelando completamente o inimigo a sua frente! ");
+                    Console.WriteLine();
+                    Console.WriteLine($"O tempo desacelera por um momento enquanto você observa atentamente o inimigo...");
+                    inimigo.Revelar();
 
+                    Console.WriteLine($"Agora você entende melhor o inimigo: ");
+                    Console.WriteLine($"Nome: {inimigo.Nome}");
+                    Console.WriteLine($"HP: {inimigo.Hp}");
+                    Console.WriteLine($"Ataque: {inimigo.Ataque}");
+                    Console.WriteLine($"Defesa: {inimigo.Defesa}");
+                    Console.WriteLine($"Alcance: {inimigo.Alcance}");
+
+                }
+                break;
                 case AcaoJogador.Fugir:
                 Console.WriteLine();
                 Console.WriteLine("Você decide recuar e fugir da batalha...");
@@ -165,84 +165,6 @@ static void Batalha (Hero heroi, Enemy inimigo)
 enum AcaoJogador{
     Atacar,
     Defender,
-    Fugir
+    Fugir,
+    Analisar
 }
-
-
-//Antigo código do RPG em C#
-// static Hero HeroiPlayer()
-// {
-//     Console.WriteLine("Digite o nome do seu heroi:");
-//     string? inputNome = Console.ReadLine();
-//     while (string.IsNullOrWhiteSpace(inputNome))
-//     {
-//         Console.WriteLine("Você não pode deixa seu nome em branco!. Digite novamente: ");
-//         inputNome = Console.ReadLine();
-//     }
-//     string HeroiNome = inputNome;
-//     Console.WriteLine("Digite a classe do seu heroi:");
-//     string? inputClasse = Console.ReadLine();
-//     while (string.IsNullOrWhiteSpace(inputClasse))
-//     {
-//         Console.Write("Você não pode deixa em branco! Digite novamente: ");
-//         inputClasse = Console.ReadLine();
-//     }
-//     string HeroiClasse = inputClasse.ToLower();
-
-//     Hero player;
-
-//     if (HeroiClasse == "guerreiro")
-//     {
-//         player = new Hero(HeroiNome, HeroiClasse, 150, 15, 10);
-//     }
-//     else if (HeroiClasse == "mago")
-//     {
-//         player = new Hero(HeroiNome, HeroiClasse, 100, 20, 3);
-//     }
-//     else if (HeroiClasse == "arqueiro")
-//     {
-//         player = new Hero(HeroiNome, HeroiClasse, 100, 22, 4);
-//     }
-//     else
-//     {
-//         player = new Hero(HeroiNome, HeroiClasse, 50, 15, 5);
-//     }
-//     return player;
-// }
-
-// Enemy slime = new Enemy ("Slime", 50, 10, 2);
-
-// static void Batalha(Hero heroi, Enemy inimigo)
-// {
-//     while (heroi.hp > 0 && inimigo.hp > 0)
-//     {
-//         inimigo.Atacar(heroi);
-//         if (heroi.hp <= 0)
-//         {
-//             Console.WriteLine("Heroi foi derrotado!");
-//             break;
-//         }
-//         Console.WriteLine();
-//         Console.WriteLine("Aperte ENTER para o herói atacar...");
-//         Console.ReadLine();
-
-//         heroi.Atacar(inimigo);
-//         if(inimigo.hp <=0)
-//         {
-//             Console.WriteLine("O Inimigo foi derrotado!");
-//             break;
-//         }
-//         Console.WriteLine("Próximo turno.. Aperte ENTER pra continuar!");
-//         Console.ReadLine();
-//     }
-// }
-
-
-// Hero heroi = HeroiPlayer();
-// Console.WriteLine($"Nome do Heroi: {heroi.nome} Classe do Heroi: {heroi.classe} Seu HP: {heroi.hp} Seu Ataque: {heroi.ataque} Sua Defesa: {heroi.defesa}");
-// Console.WriteLine($"Um Inimigo: {slime.nome}  Hp: {slime.hp}  Ataque: {slime.ataque} Defesa: {slime.defesa}");
-// Batalha(heroi, slime);
-
-
-
-
