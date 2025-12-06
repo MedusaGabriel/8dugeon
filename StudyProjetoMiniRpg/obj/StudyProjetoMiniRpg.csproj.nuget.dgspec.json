@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj": {}
+    "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj": {
+    "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
+        "projectUniqueName": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
         "projectName": "StudyProjetoMiniRpg",
-        "projectPath": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
+        "projectPath": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
         "packagesPath": "C:\\Users\\Medusa\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\obj\\",
+        "outputPath": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Medusa\\AppData\\Roaming\\NuGet\\NuGet.Config"
