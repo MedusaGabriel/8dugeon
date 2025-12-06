@@ -29,7 +29,7 @@ public class Hero
         }
         string heroiNome = inputNome;
 
-        Console.WriteLine("Digite a calsse do seu heroi: (que tal Guerreiro? Mago? Arqueiro? ou Algo diferente...)");
+        Console.WriteLine("Digite a classe do seu heroi: (Guerreiro, Mago, Arqueiro ou Algo diferente...)");
         string? inputClasse = Console.ReadLine();
         while (string.IsNullOrWhiteSpace(inputClasse))
         {
@@ -41,7 +41,7 @@ public class Hero
         string heroiClasse = inputClasse.Trim();
         if (!HeroClassConfig.Classes.TryGetValue(heroiClasse, out HeroClassStats? stats))
         {
-            Console.WriteLine($"Classe '{heroiClasse}'... estranho... mas tudo bem, vou te dar algumas estatisticas.");
+            Console.WriteLine($"Classe '{heroiClasse}'... estranho...mas tudo bem, vou te dar algumas estatisticas.");
             Console.WriteLine();
             stats = HeroClassConfig.DefaultClassStats;
         }

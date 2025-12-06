@@ -1,0 +1,63 @@
+{
+  "1": {
+    "OnAppear": {
+      "NoRevel": [
+        "Uma massa gelatinosa se arrasta pelo chão.",
+        "Você quase pisa em algo viscoso. Seja o que for, está pronto para lhe atacar!"
+      ],
+      "Revel": [
+        "O Slime se ergue à sua frente, sua forma gelatinosa oscilando enquanto se prepara para atacar.",
+        "Agora visível em detalhes, o Slime vibra e concentra sua massa antes de avançar."
+      ]
+    },
+    "OnAttack": {
+      "NoRevel": [
+        "A criatura viscosa se lança em sua direção.",
+        "A massa gelatinosa avança num salto estranho."
+      ],
+      "Revel": [
+        "O Slime salta e espirra gosma em sua direção.",
+        "O Slime se contorce e arremessa parte de seu corpo viscoso contra você."
+      ]
+    },
+    "OnHurt": [
+      "A criatura treme, parte de seu corpo se desfaz no chão.",
+      "A massa vibra, perdendo parte da sua forma."
+    ],
+    "OnDeath": [
+      "A forma viscosa se desfaz em uma poça inofensiva.",
+      "Restam apenas resíduos pegajosos no chão."
+    ]
+  },
+  "2": {
+    "OnAppear": {
+      "NoRevel": [
+        "Uma pequena figura se mexe nas sombras, rindo baixo.",
+        "Você vê um vulto baixo e ágil te observando à distância."
+      ],
+      "Revel": [
+        "Um Goblin salta para fora das sombras, exibindo um sorriso maldoso.",
+        "Agora você vê claramente o Goblin, com sua adaga enferrujada em mãos."
+      ]
+    },
+    "OnAttack": {
+      "NoRevel": [
+        "A figura baixa avança rapidamente, brandindo algo metálico.",
+        "O vulto sai das sombras em um pulo, mirando seu flanco."
+      ],
+      "Revel": [
+        "O Goblin avança com sua adaga enferrujada.",
+        "O Goblin corre em sua direção, rindo enquanto tenta atingir seu abdômen."
+      ]
+    },
+    "OnHurt": [
+      "O Goblin recua, rosnando de dor.",
+      "A pequena criatura leva a mão ao ferimento e solta um xingamento rouco."
+    ],
+    "OnDeath": [
+      "O Goblin cai ao chão, deixando cair algumas moedas velhas.",
+      "Com um último suspiro, o Goblin desaba, sua adaga ressoando ao tocar o chão."
+    ]
+  }
+}
+
