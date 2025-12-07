@@ -2,24 +2,25 @@ using System.Collections.Generic;
 
 public class Enemy
 {
-    public int ClasseId { get; set; }
-    public string Nome { get; }
-
+    public string Nome { get; private set; } = "";
+    public string Descricao { get; private set; } = "";
     public int Hp { get; private set; }
-    public int Ataque { get; }
-    public int Defesa { get; }
-    public int Alcance { get; }
-    public string Descricao { get; }
+    public int HpAtual { get; private set; }
+    public int Ataque { get; private set; }
+    public int Defesa { get; private set; }
+    public int Alcance { get; private set; }
+    public int ClasseId { get; private set; }    
     public bool Revelado { get; set; } = false;
 
     public Enemy(EnemyClassStats stats)
     {
         ClasseId = stats.ClasseId;
         Nome = stats.Nome;
+        Descricao = stats.Descricao;
         Hp = stats.Hp;
+        HpAtual = stats.Hp;
         Ataque = stats.Ataque;
         Defesa = stats.Defesa;
-        Descricao = stats.Descricao.ToString();
         Alcance = stats.Alcance;
     }
     public void Revelar()

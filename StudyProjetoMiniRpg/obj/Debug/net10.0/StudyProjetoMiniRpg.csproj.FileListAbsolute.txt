@@ -28,3 +28,5 @@ D:\Estudo\8dugeon\StudyProjetoMiniRpg\obj\Debug\net10.0\refint\StudyProjetoMiniR
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\obj\Debug\net10.0\StudyProjetoMiniRpg.pdb
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\obj\Debug\net10.0\StudyProjetoMiniRpg.genruntimeconfig.cache
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\obj\Debug\net10.0\ref\StudyProjetoMiniRpg.dll
+D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\enemy_classes.json
+D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\enemy_narrations.json

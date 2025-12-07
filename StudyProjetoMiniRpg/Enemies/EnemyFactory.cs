@@ -1,25 +1,38 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public static class EnemyFactory
 {
-    private static readonly Random _random = new Random();
-
-    public static Enemy CriarInimigo(int classeId)
-    {
-        if (!EnemyClassConfig.Classes.TryGetValue(classeId, out var stats))
-        {
-            throw new ArgumentException($"Classe de inimigo com ID {classeId} não encontrada.");
-        }
-        return new Enemy(stats);
-    }
+    private static readonly Random _rng = new Random();
 
     public static Enemy CriarInimigoAleatorio()
     {
-         var todasClasses = new List<EnemyClassStats>(EnemyClassConfig.Classes.Values);
-        int index = _random.Next(todasClasses.Count);
-        var statsSorteado = todasClasses[index];
+        if (EnemyClassConfig.Classes == null || EnemyClassConfig.Classes.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "EnemyClassConfig.Classes está vazio. Verifique se o JSON foi carregado corretamente."
+            );
+        }
 
-        return new Enemy(statsSorteado); 
+        List<EnemyClassStats> listaClasses = EnemyClassConfig.Classes.Values.ToList();
+
+        int index = _rng.Next(listaClasses.Count);
+
+        EnemyClassStats stats = listaClasses[index];
+
+        return new Enemy(stats);
+    }
+
+    public static Enemy CriarPorClasseId(int classeId)
+    {
+        if (!EnemyClassConfig.Classes.TryGetValue(classeId, out var stats))
+        {
+            throw new ArgumentException(
+                $"Classe de inimigo com ID {classeId} não encontrada em EnemyClassConfig."
+            );
+        }
+
+        return new Enemy(stats);
     }
 }
