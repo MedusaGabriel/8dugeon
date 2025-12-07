@@ -6,7 +6,6 @@ using System.Text.Json;
 
 public static class EnemyClassConfig
 {
-    // Exposto só para leitura
     public static IReadOnlyDictionary<int, EnemyClassStats> Classes { get; private set; }
         = new Dictionary<int, EnemyClassStats>();
 
