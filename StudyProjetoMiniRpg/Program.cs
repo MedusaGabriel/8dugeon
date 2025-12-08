@@ -6,6 +6,7 @@ Hero Heroi = Hero.CriarHeroi();
 Batalha(Heroi, Inimigo);
 
 
+
 static void Batalha(Hero heroi, Enemy inimigo)
 {
     Console.WriteLine();
@@ -19,6 +20,8 @@ static void Batalha(Hero heroi, Enemy inimigo)
     else
     {
         Console.WriteLine("Uma presença desconhecida surge à sua frente...");
+        
+        
     }
     Console.WriteLine();
 
