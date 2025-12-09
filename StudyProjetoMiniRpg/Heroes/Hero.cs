@@ -7,14 +7,16 @@ public class Hero
     public int hp;
     public int ataque;
     public int defesa;
+    public int alcance;
 
-    public Hero(string nome, string classe, int hp, int ataque, int defesa)
+    public Hero(string nome, string classe, int hp, int ataque, int defesa, int alcance)
     {
         this.nome = nome;
         this.classe = classe;
         this.hp = hp;
         this.ataque = ataque;
         this.defesa = defesa;
+        this.alcance = alcance;
     }
 
     public static Hero CriarHeroi()
@@ -50,7 +52,8 @@ public class Hero
             heroiClasse,
             stats.Hp,
             stats.Ataque,
-            stats.Defesa
+            stats.Defesa,
+            stats.Alcance
         );
         return player;
     }
