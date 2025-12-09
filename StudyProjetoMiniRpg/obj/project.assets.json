@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
+      "projectUniqueName": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
       "projectName": "StudyProjetoMiniRpg",
-      "projectPath": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
+      "projectPath": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\StudyProjetoMiniRpg.csproj",
       "packagesPath": "C:\\Users\\Medusa\\.nuget\\packages\\",
-      "outputPath": "D:\\Estudo\\8dugeon\\StudyProjetoMiniRpg\\obj\\",
+      "outputPath": "C:\\Users\\Medusa\\Documents\\GitHub\\8dugeon\\StudyProjetoMiniRpg\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Medusa\\AppData\\Roaming\\NuGet\\NuGet.Config"
