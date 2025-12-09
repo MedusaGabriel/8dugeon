@@ -9,8 +9,12 @@ public class Enemy
     public int Ataque { get; private set; }
     public int Defesa { get; private set; }
     public int Alcance { get; private set; }
-    public int ClasseId { get; private set; }    
+    public int ClasseId { get; private set; }
     public bool Revelado { get; set; } = false;
+    public int StaminaMax { get; set; }
+    public int StaminaAtual { get; set; }
+    public int CustoAtaque { get; set; }
+    public int RecuperacaoPorTurno { get; set; }
 
     public Enemy(EnemyClassStats stats)
     {
@@ -22,6 +26,11 @@ public class Enemy
         Ataque = stats.Ataque;
         Defesa = stats.Defesa;
         Alcance = stats.Alcance;
+
+        StaminaMax = stats.StaminaMax;
+        StaminaAtual = StaminaMax;
+        RecuperacaoPorTurno = stats.StaminaRecuperacao;
+        CustoAtaque = 1;
     }
     public void Revelar()
     {

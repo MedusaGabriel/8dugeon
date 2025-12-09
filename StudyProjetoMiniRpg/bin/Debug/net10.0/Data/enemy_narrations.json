@@ -2,33 +2,54 @@
   "1": {
     "OnAppear": {
       "NoRevel": [
-        "Uma massa gelatinosa se arrasta pelo chão.",
-        "Você quase pisa em algo viscoso. Seja o que for, está pronto para lhe atacar!"
+        "Uma massa gelatinosa pulsa lentamente no chão, quase imperceptível.",
+        "Você sente algo viscoso próximo ao seu pé antes de notar a criatura se formando."
       ],
       "Revel": [
-        "O Slime se ergue à sua frente, sua forma gelatinosa oscilando enquanto se prepara para atacar.",
-        "Agora visível em detalhes, o Slime vibra e concentra sua massa antes de avançar."
+        "O Slime se ergue, sua superfície translúcida vibrando de forma ameaçadora.",
+        "A criatura gelatinosa toma forma diante de você, oscilando enquanto se prepara para atacar."
       ]
     },
     "OnAttack": {
-      "NoRevel": [
-        "A criatura viscosa se lança em sua direção.",
-        "A massa gelatinosa avança num salto estranho."
-      ],
-      "Revel": [
-        "O Slime salta e espirra gosma em sua direção.",
-        "O Slime se contorce e arremessa parte de seu corpo viscoso contra você."
-      ]
+      "Rapido": {
+        "NoRevel": [
+          "A massa viscosa avança em um salto súbito, espirrando líquido ao seu redor.",
+          "A criatura gelatinosa se contrai e é lançada para frente em um movimento rápido."
+        ],
+        "Revel": [
+          "O Slime dispara em sua direção, arremessando um jato de gosma pegajosa.",
+          "O Slime vibra intensamente e salta de forma acelerada, tentando te envolver."
+        ]
+      },
+      "Fraco": {
+        "NoRevel": [
+          "A massa viscosa se aproxima lentamente, deixando um rastro pegajoso.",
+          "A criatura hesita antes de tentar se arrastar até você."
+        ],
+        "Revel": [
+          "O Slime empurra parte de sua forma para frente, tentando te atingir sem muita força.",
+          "A criatura gelatinosa avança devagar, como se estivesse testando sua reação."
+        ]
+      },
+      "Forte": {
+        "NoRevel": [
+          "A criatura se contrai profundamente, acumulando massa antes de saltar.",
+          "O Slime vibra com intensidade, preparando um ataque mais pesado."
+        ],
+        "Revel": [
+          "O Slime se lança com grande força, espalhando grande quantidade de gosma ao impacto.",
+          "A massa gelatinosa concentra grande parte de seu corpo e desfere um ataque poderoso."
+        ]
+      }
     },
     "OnHurt": [
-      "A criatura treme, parte de seu corpo se desfaz no chão.",
-      "A massa vibra, perdendo parte da sua forma."
+      "A criatura perde coesão por um instante, deixando um rastro mais espesso de gosma."
     ],
     "OnDeath": [
-      "A forma viscosa se desfaz em uma poça inofensiva.",
-      "Restam apenas resíduos pegajosos no chão."
+      "Toda a forma gelatinosa colapsa, virando apenas um resíduo pegajoso."
     ]
   },
+
   "2": {
     "OnAppear": {
       "NoRevel": [
@@ -51,13 +72,60 @@
       ]
     },
     "OnHurt": [
-      "O Goblin recua, rosnando de dor.",
       "A pequena criatura leva a mão ao ferimento e solta um xingamento rouco."
     ],
     "OnDeath": [
-      "O Goblin cai ao chão, deixando cair algumas moedas velhas.",
       "Com um último suspiro, o Goblin desaba, sua adaga ressoando ao tocar o chão."
+    ]
+  },
+  "3": {
+    "OnAppear": {
+      "NoRevel": [
+        "Um vulto massivo surge entre os arbustos, resmungando baixo.",
+        "Você ouve passos pesados antes de uma forma enorme aparecer parcialmente na escuridão."
+      ],
+      "Revel": [
+        "O Orc emerge por completo, exibindo sua postura imponente e músculos tensionados.",
+        "Agora visível, o Orc rosna alto, batendo sua arma contra a própria mão em provocação."
+      ]
+    },
+    "OnAttack": {
+      "Rapido": {
+        "NoRevel": [
+          "A criatura massiva avança com surpreendente agilidade para alguém tão grande.",
+          "O vulto musculoso dá dois passos fortes e um bote rápido, tentando te pegar desprevenido."
+        ],
+        "Revel": [
+          "O Orc dispara em sua direção com um golpe rápido, embora bruto.",
+          "O Orc rosna e investe com velocidade inesperada, tentando te atingir antes que você reaja."
+        ]
+      },
+      "Fraco": {
+        "NoRevel": [
+          "A criatura hesita por um instante, arrastando sua arma pelo chão.",
+          "O vulto pesado se aproxima devagar, observando seus movimentos antes de atacar."
+        ],
+        "Revel": [
+          "O Orc ergue sua arma com pouca força, como se estivesse testando sua defesa.",
+          "O Orc desfere um golpe lento, quase preguiçoso, mas ainda perigoso devido ao peso da arma."
+        ]
+      },
+      "Forte": {
+        "NoRevel": [
+          "O brutamontes respira fundo, firmando os pés no chão antes de investir.",
+          "A criatura massiva levanta sua arma com ambas as mãos, preparando um ataque devastador."
+        ],
+        "Revel": [
+          "O Orc solta um rugido poderoso e desfere um golpe brutal, capaz de partir madeira.",
+          "Com toda sua força, o Orc balança a arma acima da cabeça e a traz para baixo em um ataque esmagador."
+        ]
+      }
+    },
+    "OnHurt": [
+      "A criatura recua um passo, mostrando os dentes em frustração."
+    ],
+    "OnDeath": [
+      "O Orc cai de joelhos antes de ruir completamente, soltando um último rosnado abafado."
     ]
   }
 }
-

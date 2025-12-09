@@ -6,6 +6,8 @@
     "Defesa": 2,
     "Alcance": 1,
     "ClasseId": 1,
+    "StaminaMax": 2,
+    "StaminaRecuperacao": 1,
     "Descricao": "Uma massa gelatinosa instável."
   },
   "2": {
@@ -15,6 +17,8 @@
     "Defesa": 5,
     "Alcance": 1,
     "ClasseId": 2,
+    "StaminaMax": 3,
+    "StaminaRecuperacao": 1,
     "Descricao": "Criatura pequena, rápida e oportunista."
   },
   "3": {
@@ -24,6 +28,8 @@
     "Defesa": 8,
     "Alcance": 1,
     "ClasseId": 3,
+    "StaminaMax": 4,
+    "StaminaRecuperacao": 1,
     "Descricao": "Brutamontes forte e resistente."
   }
 }

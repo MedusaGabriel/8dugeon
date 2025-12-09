@@ -8,4 +8,7 @@ public class EnemyClassStats
     public int Alcance {get; set;}
     public int ClasseId {get; set;}
 
+    public int StaminaMax { get; set; } = 3;
+    public int StaminaRecuperacao { get; set; } = 1;
+
 }

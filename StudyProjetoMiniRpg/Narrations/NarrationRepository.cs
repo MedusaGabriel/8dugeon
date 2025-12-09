@@ -5,95 +5,94 @@ using System.Text.Json;
 
 public static class NarrationRepository
 {
-    private static readonly Dictionary<int, EnemyNarrationSet> _enemyNarrations = new();
-    private static readonly Random _random = new();
+    private static Dictionary<int, EnemyNarrationDefinition> _enemyNarrations =
+        new Dictionary<int, EnemyNarrationDefinition>();
 
-    public static void LoadFromJson(string filePath)
+    public static void LoadFromJson(string path)
     {
-        if (!File.Exists(filePath))
-            throw new FileNotFoundException($"Arquivo de narração não encontrado: {filePath}");
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException(
+                $"Arquivo de narrações de inimigos não encontrado em '{path}'.");
+        }
 
-        string json = File.ReadAllText(filePath);
+        string json = File.ReadAllText(path);
 
-        var dict = JsonSerializer.Deserialize<Dictionary<string, EnemyNarrationSet>>(json);
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
-        if (dict == null)
-            throw new Exception("Falha ao desserializar o arquivo de narração.");
+        var dict =
+            JsonSerializer.Deserialize<Dictionary<string, EnemyNarrationDefinition>>(json, options)
+            ?? throw new InvalidOperationException(
+                "Não foi possível desserializar o arquivo enemy_narrations.json."
+            );
 
         _enemyNarrations.Clear();
 
         foreach (var kvp in dict)
         {
-            if (int.TryParse(kvp.Key, out int classeId))
+            if (int.TryParse(kvp.Key, out int id))
             {
-                _enemyNarrations[classeId] = kvp.Value;
+                _enemyNarrations[id] = kvp.Value;
             }
         }
     }
 
-    // ---------- Appear ----------
+    private static EnemyNarrationDefinition? GetDef(int classeId)
+    {
+        _enemyNarrations.TryGetValue(classeId, out var def);
+        return def;
+    }
+
+    private static string? PickRandom(List<string>? lista)
+    {
+        if (lista == null || lista.Count == 0)
+            return null;
+
+        var rng = new Random();
+        int index = rng.Next(lista.Count);
+        return lista[index];
+    }
+
     public static string? GetRandomAppearText(int classeId, bool revelado)
     {
-        if (!_enemyNarrations.TryGetValue(classeId, out var set))
-            return null;
+        var def = GetDef(classeId);
+        if (def?.OnAppear == null) return null;
 
-        var lista = revelado ? set.OnAppear.Revel : set.OnAppear.NoRevel;
-
-        if (lista == null || lista.Count == 0)
-        {
-            lista = revelado ? set.OnAppear.NoRevel : set.OnAppear.Revel;
-        }
-
-        if (lista == null || lista.Count == 0)
-            return null;
-
-        int index = _random.Next(lista.Count);
-        return lista[index];
+        return revelado
+            ? PickRandom(def.OnAppear.Revel)
+            : PickRandom(def.OnAppear.NoRevel);
     }
 
-    // ---------- Attack ----------
-    public static string? GetRandomAttackText(int classeId, bool revelado)
-    {
-        if (!_enemyNarrations.TryGetValue(classeId, out var set))
-            return null;
-
-        var lista = revelado ? set.OnAttack.Revel : set.OnAttack.NoRevel;
-
-        if (lista == null || lista.Count == 0)
-        {
-            lista = revelado ? set.OnAttack.NoRevel : set.OnAttack.Revel;
-        }
-
-        if (lista == null || lista.Count == 0)
-            return null;
-
-        int index = _random.Next(lista.Count);
-        return lista[index];
-    }
-
-    // ---------- Hurt ----------
     public static string? GetRandomHurtText(int classeId)
     {
-        if (!_enemyNarrations.TryGetValue(classeId, out var set))
-            return null;
-
-        if (set.OnHurt == null || set.OnHurt.Count == 0)
-            return null;
-
-        int index = _random.Next(set.OnHurt.Count);
-        return set.OnHurt[index];
+        var def = GetDef(classeId);
+        return PickRandom(def?.OnHurt);
     }
 
-    // ---------- Death ----------
     public static string? GetRandomDeathText(int classeId)
     {
-        if (!_enemyNarrations.TryGetValue(classeId, out var set))
-            return null;
+        var def = GetDef(classeId);
+        return PickRandom(def?.OnDeath);
+    }
 
-        if (set.OnDeath == null || set.OnDeath.Count == 0)
-            return null;
+    public static string? GetRandomAttackText(int classeId, bool revelado, EnemyAttackStyle estilo)
+    {
+        var def = GetDef(classeId);
+        if (def?.OnAttack == null) return null;
 
-        int index = _random.Next(set.OnDeath.Count);
-        return set.OnDeath[index];
+        var variante = def.OnAttack.GetForStyle(estilo);
+        if (variante == null) return null;
+
+        return revelado
+            ? PickRandom(variante.Revel)
+            : PickRandom(variante.NoRevel);
+    }
+
+    public static string? GetRandomAttackText(int classeId, bool revelado)
+    {
+        return GetRandomAttackText(classeId, revelado, EnemyAttackStyle.Fraco);
     }
 }

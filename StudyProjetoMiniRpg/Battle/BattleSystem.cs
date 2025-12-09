@@ -31,7 +31,6 @@ public static class BattleSystem
             switch (acao)
             {
                 case AcaoJogador.Atacar:
-                    // Futuro: usar comando.AtaqueForte aqui
                     batalhaTerminou = ExecutarTurnoAtaque(heroi, inimigo, heroClassKey);
                     break;
 
@@ -77,12 +76,123 @@ public static class BattleSystem
 
         Console.WriteLine();
     }
+    static EnemyAttackStyle EscolherEstiloAtaque(Enemy inimigo)
+    {
+        var rng = new Random();
+
+        if (inimigo.StaminaAtual >= 3)
+        {
+            int roll = rng.Next(0, 3); // 0,1,2
+            return roll switch
+            {
+                0 => EnemyAttackStyle.Rapido,
+                1 => EnemyAttackStyle.Fraco,
+                _ => EnemyAttackStyle.Forte
+            };
+        }
+
+        if (inimigo.StaminaAtual == 2)
+        {
+            int roll = rng.Next(0, 2); // 0,1
+            return roll == 0 ? EnemyAttackStyle.Rapido : EnemyAttackStyle.Fraco;
+        }
+
+        return EnemyAttackStyle.Rapido;
+    }
+
+    static int ObterCustoPorEstilo(EnemyAttackStyle estilo)
+    {
+        return estilo switch
+        {
+            EnemyAttackStyle.Rapido => 1,
+            EnemyAttackStyle.Fraco => 1,
+            EnemyAttackStyle.Forte => 3,
+            _ => 1
+        };
+    }
+
+
+
+
+    static bool InimigoAtacaSeTiverStamina(Hero heroi, Enemy inimigo, string heroClassKey)
+    {
+        if (inimigo.StaminaAtual < 1)
+        {
+            Print("A criatura parece exausta e recua por um instante, recuperando o fôlego...");
+            inimigo.StaminaAtual += inimigo.RecuperacaoPorTurno;
+            if (inimigo.StaminaAtual > inimigo.StaminaMax)
+                inimigo.StaminaAtual = inimigo.StaminaMax;
+
+            return false;
+        }
+
+        EnemyAttackStyle estilo = EscolherEstiloAtaque(inimigo);
+        int custo = ObterCustoPorEstilo(estilo);
+
+        if (inimigo.StaminaAtual < custo)
+        {
+            Print("A criatura vacila por um instante, sem forças suficientes para atacar.");
+            inimigo.StaminaAtual += inimigo.RecuperacaoPorTurno;
+            if (inimigo.StaminaAtual > inimigo.StaminaMax)
+                inimigo.StaminaAtual = inimigo.StaminaMax;
+
+            return false;
+        }
+
+        string? textoAtaqueInimigo =
+            NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado, estilo);
+
+        if (!string.IsNullOrWhiteSpace(textoAtaqueInimigo))
+            Print(textoAtaqueInimigo);
+
+        int danoBase = inimigo.Ataque;
+        int danoFinal = danoBase;
+
+        switch (estilo)
+        {
+            case EnemyAttackStyle.Rapido:
+                danoFinal = (int)Math.Round(danoBase * 0.8);
+                break;
+            case EnemyAttackStyle.Fraco:
+                danoFinal = (int)Math.Round(danoBase * 0.5);
+                break;
+            case EnemyAttackStyle.Forte:
+                danoFinal = (int)Math.Round(danoBase * 1.5);
+                break;
+        }
+
+        if (danoFinal < 1)
+            danoFinal = 1;
+
+        heroi.TomarDano(danoFinal);
+
+        inimigo.StaminaAtual -= custo;
+        if (inimigo.StaminaAtual < 0)
+            inimigo.StaminaAtual = 0;
+
+        string narracaoTomarDanoHeroi =
+            _heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.TomarDano);
+        Print(narracaoTomarDanoHeroi);
+
+        if (heroi.hp <= 0)
+        {
+            Print("O herói foi derrotado!");
+            return true;
+        }
+
+        return false;
+    }
+
+
+
 
     static bool ExecutarTurnoAtaque(Hero heroi, Enemy inimigo, string heroClassKey)
     {
         Console.WriteLine();
 
-        Print(_heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.CausarDano));
+        string narracaoAtaqueHeroi =
+            _heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.CausarDano);
+        Print(narracaoAtaqueHeroi);
 
         Console.WriteLine();
 
@@ -98,7 +208,6 @@ public static class BattleSystem
         if (inimigo.Hp <= 0)
         {
             string? textoMorte = NarrationRepository.GetRandomDeathText(inimigo.ClasseId);
-
             if (!string.IsNullOrWhiteSpace(textoMorte))
                 Print(textoMorte);
             else
@@ -107,62 +216,80 @@ public static class BattleSystem
             return true;
         }
 
-        string? textoAtaqueInimigo = NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado);
-        if (!string.IsNullOrWhiteSpace(textoAtaqueInimigo))
-            Print(textoAtaqueInimigo);
-
-        heroi.TomarDano(inimigo.Ataque);
-
-        Print(_heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.TomarDano));
-
-        if (heroi.hp <= 0)
-        {
-            Print("O herói foi derrotado!");
+        bool heroiMorreu = InimigoAtacaSeTiverStamina(heroi, inimigo, heroClassKey);
+        if (heroiMorreu)
             return true;
-        }
 
         return false;
     }
+
 
     static bool ExecutarTurnoDefesa(Hero heroi, Enemy inimigo, Random rng, string heroClassKey)
     {
         Console.WriteLine();
 
-        Print(_heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.Defender));
+        string narracaoDefesaHeroi =
+            _heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.Defender);
+        Print(narracaoDefesaHeroi);
+
+        if (inimigo.StaminaAtual < inimigo.CustoAtaque)
+        {
+            Print("A criatura tenta se mover para atacar, mas está exausta demais para reagir ao seu movimento defensivo.");
+            inimigo.StaminaAtual += inimigo.RecuperacaoPorTurno;
+            if (inimigo.StaminaAtual > inimigo.StaminaMax)
+                inimigo.StaminaAtual = inimigo.StaminaMax;
+
+            return false;
+        }
 
         int rolagem = rng.Next(0, 100);
 
         if (rolagem < 50)
         {
+            Console.WriteLine();
             Print("Você foi rápido o suficiente! Sua defesa reduz o dano pela metade!");
 
-            string? textoAtaqueDefendido = NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado);
+            string? textoAtaqueDefendido =
+                NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado);
+
             if (!string.IsNullOrWhiteSpace(textoAtaqueDefendido))
                 Print(textoAtaqueDefendido);
 
-            heroi.TomarDano(inimigo.Ataque / 2);
+            int danoReduzido = inimigo.Ataque / 2;
+            heroi.TomarDano(danoReduzido);
         }
         else
         {
+            Console.WriteLine();
             Print("Você foi lento demais! Não conseguiu se defender a tempo.");
 
-            string? textoAtaqueFalhaDefesa = NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado);
+            string? textoAtaqueFalhaDefesa =
+                NarrationRepository.GetRandomAttackText(inimigo.ClasseId, inimigo.Revelado);
+
             if (!string.IsNullOrWhiteSpace(textoAtaqueFalhaDefesa))
                 Print(textoAtaqueFalhaDefesa);
 
             heroi.TomarDano(inimigo.Ataque);
         }
 
-        Print(_heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.TomarDano));
+        inimigo.StaminaAtual -= inimigo.CustoAtaque;
+        if (inimigo.StaminaAtual < 0)
+            inimigo.StaminaAtual = 0;
+
+        string narracaoTomarDanoHeroi =
+            _heroNarrations.GetRandomNarration(heroClassKey, HeroNarrationEvent.TomarDano);
+        Print(narracaoTomarDanoHeroi);
 
         if (heroi.hp <= 0)
         {
+            Console.WriteLine();
             Print("Mesmo se defendendo, o herói foi derrotado....");
             return true;
         }
 
         return false;
     }
+
 
     static void ExecutarTurnoAnalise(Hero heroi, Enemy inimigo)
     {
