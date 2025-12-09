@@ -12,45 +12,46 @@ public static class BattleSystem
     }
 
     public static void Executar(Hero heroi, Enemy inimigo, string heroClassKey)
+{
+    Console.WriteLine();
+
+    ExibirAparicaoInimigo(inimigo);
+
+    Random rng = new Random();
+
+    while (heroi.hp > 0 && inimigo.Hp > 0)
     {
-        Console.WriteLine();
+        ExibirStatusInicioTurno(heroi, inimigo);
 
-        ExibirAparicaoInimigo(inimigo);
+        ComandoJogador comando = PlayerInput.LerComandoJogador(heroi);
+        AcaoJogador acao = comando.AcaoBase;
 
-        Random rng = new Random();
+        bool batalhaTerminou = false;
 
-        while (heroi.hp > 0 && inimigo.Hp > 0)
+        switch (acao)
         {
-            ExibirStatusInicioTurno(heroi, inimigo);
+            case AcaoJogador.Atacar:
+                batalhaTerminou = ExecutarTurnoAtaque(heroi, inimigo, heroClassKey);
+                break;
 
-            ComandoJogador comando = PlayerInput.LerComandoJogador(heroi);
-            AcaoJogador acao = comando.AcaoBase;
+            case AcaoJogador.Defender:
+                batalhaTerminou = ExecutarTurnoDefesa(heroi, inimigo, rng, heroClassKey);
+                break;
 
-            bool batalhaTerminou = false;
+            case AcaoJogador.Analisar:
+                ExecutarTurnoAnalise(heroi, inimigo, heroClassKey);
+                break;
 
-            switch (acao)
-            {
-                case AcaoJogador.Atacar:
-                    batalhaTerminou = ExecutarTurnoAtaque(heroi, inimigo, heroClassKey);
-                    break;
-
-                case AcaoJogador.Defender:
-                    batalhaTerminou = ExecutarTurnoDefesa(heroi, inimigo, rng, heroClassKey);
-                    break;
-
-                case AcaoJogador.Analisar:
-                    ExecutarTurnoAnalise(heroi, inimigo);
-                    break;
-
-                case AcaoJogador.Fugir:
-                    batalhaTerminou = ExecutarTurnoFuga(heroi, heroClassKey);
-                    break;
-            }
-
-            if (batalhaTerminou)
-                return;
+            case AcaoJogador.Fugir:
+                batalhaTerminou = ExecutarTurnoFuga(heroi, heroClassKey);
+                break;
         }
+
+        if (batalhaTerminou)
+            return;
     }
+}
+
 
     static void ExibirAparicaoInimigo(Enemy inimigo)
     {
@@ -290,38 +291,128 @@ public static class BattleSystem
         return false;
     }
 
+    static void ExecutarTurnoAnalise(Hero heroi, Enemy inimigo, string heroClassKey)
+{
+    Console.WriteLine();
+    Print("Você decide analisar a situação com mais cuidado...");
 
-    static void ExecutarTurnoAnalise(Hero heroi, Enemy inimigo)
+    while (true)
     {
+        Print("O que você deseja analisar?");
+        Print("1 - Seu herói");
+        Print("2 - A criatura à sua frente");
+        Print("Digite 1, 2 ou algo como 'analisar herói' ou 'analisar inimigo':");
+
+        string? input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            Print("Não entendi bem. Tente novamente.");
+            continue;
+        }
+
+        input = input.Trim().ToLowerInvariant();
+
+        // Foca no herói
+        if (input == "1" ||
+            input.Contains("heroi") ||
+            input.Contains("herói") ||
+            input.Contains("meu") ||
+            input.Contains("minha") ||
+            input.Contains("eu"))
+        {
+            AnalisarHeroi(heroi, heroClassKey);
+            return;
+        }
+
+        // Foca no inimigo
+        if (input == "2" ||
+            input.Contains("inim") ||
+            input.Contains("criatura") ||
+            input.Contains("monstro"))
+        {
+            AnalisarInimigo(heroi, inimigo);
+            return;
+        }
+
+        Print("Não ficou claro se você quer analisar o herói ou o inimigo. Tente ser mais específico.");
+    }
+}
+
+static void AnalisarInimigo(Hero heroi, Enemy inimigo)
+{
+    Console.WriteLine();
+
+    if (!inimigo.Revelado)
+    {
+        Print("Um olho intertemporal surge em sua mente, revelando completamente a criatura à sua frente!");
+        Thread.Sleep(1000);
+        Print("O tempo desacelera por um momento enquanto você observa atentamente o inimigo...");
+        Thread.Sleep(1000);
+
+        inimigo.Revelar();
+
+        Print("Agora você entende melhor o inimigo:");
+        Console.WriteLine($"Nome: {inimigo.Nome}");
+        Console.WriteLine($"HP: {inimigo.Hp}");
+        Console.WriteLine($"Descrição: {inimigo.Descricao}");
+        Console.WriteLine($"Ataque: {inimigo.Ataque}");
+        Console.WriteLine($"Defesa: {inimigo.Defesa}");
+        Console.WriteLine($"Alcance: {inimigo.Alcance}");
         Console.WriteLine();
 
-        if (!inimigo.Revelado)
-        {
-            Print("Um olho intertemporal surge em sua mente, revelando completamente a criatura à sua frente!");
-            Thread.Sleep(1000);
-            Print("O tempo desacelera por um momento enquanto você observa atentamente o inimigo...");
-            Thread.Sleep(1000);
-
-            inimigo.Revelar();
-
-            Print("Agora você entende melhor o inimigo:");
-            Console.WriteLine($"Nome: {inimigo.Nome}");
-            Console.WriteLine($"HP: {inimigo.Hp}");
-            Console.WriteLine($"Descrição: {inimigo.Descricao}");
-            Console.WriteLine($"Ataque: {inimigo.Ataque}");
-            Console.WriteLine($"Defesa: {inimigo.Defesa}");
-            Console.WriteLine($"Alcance: {inimigo.Alcance}");
-            Console.WriteLine();
-
-            string? textoAparicaoRevel = NarrationRepository.GetRandomAppearText(inimigo.ClasseId, true);
-            if (!string.IsNullOrWhiteSpace(textoAparicaoRevel))
-                Print(textoAparicaoRevel);
-        }
-        else
-        {
-            Print("Você já analisou esse inimigo. Nada novo é revelado.");
-        }
+        string? textoAparicaoRevel = NarrationRepository.GetRandomAppearText(inimigo.ClasseId, true);
+        if (!string.IsNullOrWhiteSpace(textoAparicaoRevel))
+            Print(textoAparicaoRevel);
     }
+    else
+    {
+        Print("Você já analisou esse inimigo. Nada novo é revelado.");
+    }
+}
+
+static void AnalisarHeroi(Hero heroi, string heroClassKey)
+{
+    Console.WriteLine();
+    Print("Você volta sua atenção para si mesmo, avaliando suas próprias capacidades...");
+
+    Console.WriteLine($"Nome: {heroi.nome}");
+    Console.WriteLine($"Classe: {heroi.classe}");
+    Console.WriteLine($"HP atual: {heroi.hp}");
+    Console.WriteLine($"Ataque base: {heroi.ataque}");
+    Console.WriteLine($"Defesa base: {heroi.defesa}");
+    Console.WriteLine();
+
+    Print("Habilidades de classe conhecidas:");
+
+    string classe = heroClassKey.ToLowerInvariant();
+//MEDIDA  TEMPORARIA APENAS PARA TESTE, DEPOIS IREMOS COLOCA ISSO EM JSON SEU SAFADO
+// VAI FICA COM LOGICA X DADOS SEPARADINHOS
+// UI UI UI 
+// PARA OS CURIOSOS DE PLANTAO ISSO E TUDO NARRATIVO AINDA NAO FOI IMPLEMENTADO
+    switch (classe)
+    {
+        case "guerreiro":
+            Print("- Golpe pesado: você concentra toda a força em um único ataque, causando muito dano, mas fica exausto e perde a próxima chance de atacar.");
+            break;
+
+        case "mago":
+            Print("- Magia concentrada: você canaliza energia arcana para um feitiço mais poderoso, aumentando o dano, mas deixando sua defesa temporariamente comprometida.");
+            break;
+
+        case "druida":
+            Print("- Chamado da natureza: você invoca forças naturais para apoiar ataque ou defesa, mas não pode usar essa habilidade em turnos consecutivos.");
+            break;
+
+        default:
+            Print("Você ainda não identificou nenhuma habilidade especial clara da sua classe.");
+            break;
+    }
+
+    Console.WriteLine();
+    Print("Essas habilidades ainda são apenas potencial — você precisará desenvolvê-las para usá-las de fato em batalha.");
+}
+
 
     static bool ExecutarTurnoFuga(Hero heroi, string heroClassKey)
     {
