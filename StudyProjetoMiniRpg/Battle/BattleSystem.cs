@@ -23,13 +23,15 @@ public static class BattleSystem
         {
             ExibirStatusInicioTurno(heroi, inimigo);
 
-            AcaoJogador acao = PlayerInput.LerAcaoJogador();
+            ComandoJogador comando = PlayerInput.LerComandoJogador(heroi);
+            AcaoJogador acao = comando.AcaoBase;
 
             bool batalhaTerminou = false;
 
             switch (acao)
             {
                 case AcaoJogador.Atacar:
+                    // Futuro: usar comando.AtaqueForte aqui
                     batalhaTerminou = ExecutarTurnoAtaque(heroi, inimigo, heroClassKey);
                     break;
 

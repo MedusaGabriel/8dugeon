@@ -2,57 +2,111 @@ using System;
 
 public static class PlayerInput
 {
-    public static AcaoJogador LerAcaoJogador()
+    private static readonly HeroInputSynonymsRepository _synonymsRepo =
+        new HeroInputSynonymsRepository();
+
+    public static ComandoJogador LerComandoJogador(Hero heroi)
     {
         while (true)
         {
-            Console.WriteLine();
-            Console.WriteLine("O que você quer fazer? (Atacar, Defender ou Fugir... talvez Analisar?)");
-            Console.Write("> ");
-            string? input = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(input))
+            Console.Write("O que você faz? ");
+            string? texto = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(texto))
             {
-                Console.WriteLine($"O seu personagem ,não entendeu sua ação, escreva algo que ele entenda");
+                Console.WriteLine("Não entendi sua ação. Tente descrever de outra forma.");
                 continue;
             }
 
-            string texto = input.ToLower();
+            texto = texto.ToLower().Trim();
 
-            if (ContemQualquer(texto, new[] { "atac", "bater", "golpe" }))
+            var comando = new ComandoJogador
             {
-                return AcaoJogador.Atacar;
+                TextoOriginal = texto
+            };
+
+            string classe = heroi.classe?.ToLower() ?? "";
+
+            HeroInputSynonymsDefinition defs = _synonymsRepo.GetMergedForClass(classe);
+
+            if (ContemQualquer(texto, defs.Fugir))
+            {
+                comando.AcaoBase = AcaoJogador.Fugir;
+                return comando;
             }
 
-            // Defender: 'defend', 'defesa', 'proteg'
-            if (ContemQualquer(texto, new[] { "defend", "defesa", "proteg" }))
+            if (ContemQualquer(texto, defs.Analisar))
             {
-                return AcaoJogador.Defender;
+                comando.AcaoBase = AcaoJogador.Analisar;
+                return comando;
             }
 
-            // Fugir: 'fug', 'correr', 'sair', 'escapar'
-            if (ContemQualquer(texto, new[] { "fug", "correr", "sair", "escapar" }))
+            if (ContemQualquer(texto, defs.Defender))
             {
-                return AcaoJogador.Fugir;
-            }
-            if (ContemQualquer(texto, new[] { "analis", "examinar", "observar", "info", "informação" }))
-            {
-                return AcaoJogador.Analisar;
+                comando.AcaoBase = AcaoJogador.Defender;
+                return comando;
             }
 
+            if (ContemQualquer(texto, defs.AtaqueForte))
+            {
+                comando.AcaoBase = AcaoJogador.Atacar;
+                comando.AtaqueForte = true;
+                return comando;
+            }
 
-            Console.WriteLine("Não entendi sua intenção. Tente algo como: 'quero atacar', 'vou defender', 'quero fugir'.");
+            if (ContemQualquer(texto, defs.Atacar))
+            {
+                comando.AcaoBase = AcaoJogador.Atacar;
+                return comando;
+            }
+
+            Console.WriteLine("Não entendi bem sua intenção. Você queria atacar, defender, analisar ou fugir?");
+            string? resposta = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(resposta))
+                continue;
+
+            resposta = resposta.ToLower().Trim();
+
+            if (resposta.StartsWith("atac"))
+            {
+                comando.AcaoBase = AcaoJogador.Atacar;
+                return comando;
+            }
+            if (resposta.StartsWith("defend") || resposta.Contains("escudo"))
+            {
+                comando.AcaoBase = AcaoJogador.Defender;
+                return comando;
+            }
+            if (resposta.StartsWith("analis") || resposta.Contains("examinar"))
+            {
+                comando.AcaoBase = AcaoJogador.Analisar;
+                return comando;
+            }
+            if (resposta.StartsWith("fug") || resposta.Contains("correr"))
+            {
+                comando.AcaoBase = AcaoJogador.Fugir;
+                return comando;
+            }
+
+            Console.WriteLine("Ainda não consegui entender sua ação. Tente descrever de outra forma.");
         }
     }
 
-    private static bool ContemQualquer(string texto, string[] chaves)
+    private static bool ContemQualquer(string texto, System.Collections.Generic.List<string>? termos)
     {
-        foreach (string chave in chaves)
+        if (termos == null || termos.Count == 0)
+            return false;
+
+        foreach (var termo in termos)
         {
-            if (texto.Contains(chave))
-            {
+            if (string.IsNullOrWhiteSpace(termo)) 
+                continue;
+
+            if (texto.Contains(termo.ToLower()))
                 return true;
-            }
         }
+
         return false;
     }
 }

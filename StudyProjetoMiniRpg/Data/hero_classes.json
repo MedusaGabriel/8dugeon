@@ -13,60 +13,11 @@
     "UsaMana": true,
     "Alcance": 5
   },
-  "arqueiro": {
-    "Hp": 100,
-    "Ataque": 22,
-    "Defesa": 4,
-    "UsaMana": false,
-    "Alcance": 4
-  },
-  "ladino": {
-    "Hp": 110,
-    "Ataque": 18,
-    "Defesa": 6,
-    "UsaMana": false,
-    "Alcance": 1
-  },
-  "paladino": {
-    "Hp": 160,
-    "Ataque": 14,
-    "Defesa": 12,
-    "UsaMana": true,
-    "Alcance": 1
-  },
-  "feiticeiro": {
-    "Hp": 90,
-    "Ataque": 25,
-    "Defesa": 2,
-    "UsaMana": true,
-    "Alcance": 5
-  },
-  "bárbaro": {
-    "Hp": 180,
-    "Ataque": 20,
-    "Defesa": 6,
-    "UsaMana": false,
-    "Alcance": 1
-  },
-  "monge": {
-    "Hp": 130,
-    "Ataque": 16,
-    "Defesa": 8,
-    "UsaMana": false,
-    "Alcance": 1
-  },
   "druida": {
     "Hp": 120,
     "Ataque": 14,
     "Defesa": 7,
     "UsaMana": true,
     "Alcance": 3
-  },
-  "assassino": {
-    "Hp": 95,
-    "Ataque": 28,
-    "Defesa": 4,
-    "UsaMana": false,
-    "Alcance": 1
   }
 }

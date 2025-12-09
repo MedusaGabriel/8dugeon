@@ -32,3 +32,4 @@ D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\enemy_classes.json
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\enemy_narrations.json
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\hero_classes.json
 D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\hero_narrations.json
+D:\Estudo\8dugeon\StudyProjetoMiniRpg\bin\Debug\net10.0\Data\hero_input_synonyms.json

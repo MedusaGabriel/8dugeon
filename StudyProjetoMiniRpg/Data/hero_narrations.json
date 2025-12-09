@@ -35,114 +35,6 @@
       "Com um último olhar calculista, o mago recua, preservando sua energia para outra batalha."
     ]
   },
-  "arqueiro": {
-    "tomarDano": [
-      "O arqueiro recua alguns passos, levando a mão ao ferimento e avaliando a distância.",
-      "Um gemido contido escapa enquanto o arqueiro sente o corpo falhar por um instante."
-    ],
-    "causarDano": [
-      "O arqueiro puxa a corda com precisão e solta uma flecha que corta o ar em direção ao alvo.",
-      "Em um movimento rápido, o arqueiro dispara outra flecha, mirando nos pontos frágeis do inimigo."
-    ],
-    "defender": [
-      "O arqueiro tenta se esquivar para o lado, usando a agilidade como escudo.",
-      "Instintivamente, o arqueiro se abaixa e usa o terreno ao redor para se proteger."
-    ],
-    "fugir": [
-      "O arqueiro recua em passos leves, mantendo a distância enquanto abandona o confronto.",
-      "Com um último disparo de cobertura, o arqueiro se vira e some entre as sombras."
-    ]
-  },
-  "ladino": {
-    "tomarDano": [
-      "O ladino estreita os olhos ao sentir o corte, mais irritado do que assustado.",
-      "Um xingamento abafado escapa enquanto o ladino sente o golpe atravessar sua defesa."
-    ],
-    "causarDano": [
-      "O ladino surge por um ângulo inesperado, cravando sua lâmina nas brechas da defesa inimiga.",
-      "Com um movimento rápido e quase invisível, o ladino desfere um golpe preciso e mortal."
-    ],
-    "defender": [
-      "O ladino se esquiva por pouco, deixando o ataque passar a centímetros do corpo.",
-      "Com um giro rápido, o ladino evita o pior do impacto, reduzindo o dano."
-    ],
-    "fugir": [
-      "O ladino desaparece em poucas passadas, deixando apenas o eco dos passos para trás.",
-      "Num misto de instinto e oportunismo, o ladino recua pela rota mais segura que enxerga."
-    ]
-  },
-  "paladino": {
-    "tomarDano": [
-      "O paladino sente o impacto reverberar pela armadura, mas mantém a postura ereta.",
-      "A dor atravessa o corpo do paladino, mas a fé o impede de vacilar."
-    ],
-    "causarDano": [
-      "O paladino ergue a arma envolta por um brilho sagrado e atinge o inimigo com firmeza.",
-      "Uma luz suave acompanha o golpe do paladino, como se um julgamento silencioso caísse sobre o alvo."
-    ],
-    "defender": [
-      "O paladino ergue o escudo, acreditando que nenhuma sombra pode atravessar sua defesa.",
-      "Com uma prece breve, o paladino fortalece sua guarda e encara o ataque de frente."
-    ],
-    "fugir": [
-      "O paladino recua com pesar, aceitando que a retirada é a única escolha sensata.",
-      "Com um último sinal de respeito ao campo de batalha, o paladino se afasta do combate."
-    ]
-  },
-  "feiticeiro": {
-    "tomarDano": [
-      "O feiticeiro solta um suspiro rouco, o corpo estremecendo sob o impacto.",
-      "A energia que envolvia o feiticeiro oscila por um momento quando a dor o atinge."
-    ],
-    "causarDano": [
-      "Sombras se contorcem ao redor do feiticeiro enquanto ele lança um feitiço devastador.",
-      "Com um sorriso discreto, o feiticeiro invoca poderes obscuros que explodem contra o inimigo."
-    ],
-    "defender": [
-      "O feiticeiro invoca um manto de energia sombria para amortecer o golpe.",
-      "Sussurros estranhos ecoam ao redor enquanto uma defesa mágica se ergue entre o feiticeiro e o ataque."
-    ],
-    "fugir": [
-      "O feiticeiro recua com passos calculados, olhando por sobre o ombro enquanto se afasta.",
-      "Com um movimento seco de manto, o feiticeiro abandona a cena, levando seus segredos consigo."
-    ]
-  },
-  "bárbaro": {
-    "tomarDano": [
-      "O bárbaro solta uma risada rouca, como se o golpe apenas alimentasse sua fúria.",
-      "O sangue escorre, mas o bárbaro parece ainda mais determinado após o impacto."
-    ],
-    "causarDano": [
-      "O bárbaro avança em um surto de violência, esmagando tudo que encontra pela frente.",
-      "Com um rugido primal, o bárbaro desfere um golpe que faz o chão parecer tremer."
-    ],
-    "defender": [
-      "O bárbaro ergue o braço ou arma instintivamente, tentando absorver o impacto na força bruta.",
-      "Ao invés de recuar, o bárbaro endurece o corpo, transformando resistência em desafio."
-    ],
-    "fugir": [
-      "Mesmo contrariado, o bárbaro recua, rosnando promessas de vingança futura.",
-      "O bárbaro dá alguns passos largos para trás, a fúria ainda queimando no olhar enquanto se afasta."
-    ]
-  },
-  "monge": {
-    "tomarDano": [
-      "O monge exala lentamente, usando a própria dor como parte do fluxo de sua respiração.",
-      "O impacto desequilibra o monge por um instante, mas ele rapidamente recupera a postura."
-    ],
-    "causarDano": [
-      "O monge desfere uma sequência rápida de golpes precisos com punhos e pés.",
-      "Em um movimento fluido, o monge atinge pontos vitais com a calma de quem treinou a vida inteira."
-    ],
-    "defender": [
-      "O monge redireciona o ataque com um movimento suave, usando a força do inimigo contra ele.",
-      "Com um giro preciso, o monge se esquiva e ajusta sua base para o próximo movimento."
-    ],
-    "fugir": [
-      "O monge recua silenciosamente, como se apenas seguisse o fluxo do próprio destino.",
-      "Com passos leves e controlados, o monge abandona o combate sem perder a serenidade."
-    ]
-  },
   "druida": {
     "tomarDano": [
       "O druida sente a dor reverberar como um eco na própria natureza ao redor.",
@@ -159,24 +51,6 @@
     "fugir": [
       "O druida recua, como se se misturasse discretamente ao ambiente ao redor.",
       "Em harmonia com o terreno, o druida se afasta, deixando o conflito para trás."
-    ]
-  },
-  "assassino": {
-    "tomarDano": [
-      "O assassino estreita os olhos, irritado por ter sido atingido.",
-      "Um lampejo de frustração passa pelo olhar do assassino ao sentir o corte."
-    ],
-    "causarDano": [
-      "O assassino surge na sombra do inimigo, desferindo um golpe rápido e silencioso.",
-      "Sem anúncio, o assassino ataca onde a defesa é mais fraca, buscando acabar com a luta em poucos movimentos."
-    ],
-    "defender": [
-      "O assassino recua meio passo, deixando o golpe passar por onde ele estava um segundo antes.",
-      "Com reflexos afiados, o assassino usa o mínimo de movimento para evitar o pior do ataque."
-    ],
-    "fugir": [
-      "O assassino se retira sem alarde, sumindo do campo de visão como se nunca estivesse ali.",
-      "Em um instante, o assassino já está longe, deixando apenas um silêncio desconfortável para trás."
     ]
   }
 }
