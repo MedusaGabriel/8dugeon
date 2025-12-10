@@ -1,18 +1,42 @@
-Projeto: Mini RPG de Turnos em Console (C#)
-Funcionalidades:
+# 8dungeon
 
-Cadastro de herói (nome, classe, HP, ataque, defesa)
+Projeto de desenvolvimento de RPG com versões em console e Unity.
 
-Inimigo gerado aleatoriamente
+## Estrutura do Projeto
 
-Sistema de combate por turnos:
+### `/legacy_console`
+Contém o projeto original em console desenvolvido em C#. Um mini-RPG baseado em texto com sistema de batalha posicional.
 
-herói escolhe: atacar, defender, usar habilidade
+**Funcionalidades:**
+- Sistema de batalha por turnos
+- Posicionamento tático
+- Classes de heróis e inimigos
+- Sistema de narração dinâmica
+- IA de inimigos
 
-inimigo ataca automaticamente
+### `/unity-8dungeon`
+Versão Unity do projeto (em desenvolvimento).
 
-Log básico no console:
+## Tecnologias
 
-“Fulano atacou e causou X de dano”
+- C# / .NET
+- Unity (planejado)
 
-“Ciclano foi derrotado”
+## Como Executar
+
+### Versão Console
+```bash
+cd legacy_console/StudyProjetoMiniRpg
+dotnet run
+```
+
+### Versão Unity
+Em desenvolvimento.
+
+## Contribuindo
+
+Este é um projeto de estudo pessoal.
+
+## Licença
+
+Projeto educacional.
