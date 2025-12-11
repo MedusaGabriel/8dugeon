@@ -29,10 +29,12 @@ public class GameController : MonoBehaviour
     private GameState currentState;
     private HeroStats hero;
     private EnemyStats enemy;
-    private BattleSystem battleSystem;
+    private BattleController battleController;
+
 
     private void Start()
     {
+        Random.InitState(System.Environment.TickCount);
         hero = null;
         EnterHeroNameState();
     }
@@ -61,8 +63,7 @@ public class GameController : MonoBehaviour
 
         enemy = CreateRandomEnemy();
 
-        // Cria o sistema de batalha com herói, inimigo e chances
-        battleSystem = new BattleSystem(
+        battleController = new BattleController(
             hero,
             enemy,
             enemyDodgeChance,
@@ -85,6 +86,7 @@ public class GameController : MonoBehaviour
 
         UpdateStatusUI();
     }
+
 
     #endregion
 
@@ -143,32 +145,24 @@ public class GameController : MonoBehaviour
         }
 
         AcaoJogador acao = CommandParser.ParsePlayerAction(input);
-        BattleRoundResult result = null;
 
-        switch (acao)
+        // Se a ação não é uma das conhecidas, trata como inválida
+        if (acao != AcaoJogador.Atacar &&
+            acao != AcaoJogador.Defender &&
+            acao != AcaoJogador.Fugir)
         {
-            case AcaoJogador.Atacar:
-                result = battleSystem.PlayerAttack();
-                ApplyBattleResult(result);
-                break;
-
-            case AcaoJogador.Defender:
-                result = battleSystem.PlayerDefend();
-                ApplyBattleResult(result);
-                break;
-
-            case AcaoJogador.Fugir:
-                result = battleSystem.PlayerFlee();
-                ApplyBattleResult(result);
-                break;
-
-            default:
-                messageText.text += "\n\nComando não reconhecido. Tente: atacar, defender ou fugir.";
-                commandInput.text = "";
-                commandInput.ActivateInputField();
-                break;
+            messageText.text += "\n\nComando não reconhecido. Tente: atacar, defender ou fugir.";
+            commandInput.text = "";
+            commandInput.ActivateInputField();
+            return;
         }
+
+        // Agora delega para o BattleController
+        BattleRoundResult result = battleController.ExecutePlayerAction(acao);
+
+        ApplyBattleResult(result);
     }
+
 
     private void ApplyBattleResult(BattleRoundResult result)
     {

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84622cf6968f1b849add38715f298ed7, type: 3}
   m_Name: Esqueleto
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTypeData
-  archetype: 0
-  enemyName: 
-  maxHp: 0
-  attack: 0
-  defense: 0
-  dodgeChance: 0
-  counterChance: 0
+  archetype: 1
+  enemyName: Esqueleto
+  maxHp: 120
+  attack: 20
+  defense: 5
+  dodgeChance: 0.5
+  counterChance: 0.1

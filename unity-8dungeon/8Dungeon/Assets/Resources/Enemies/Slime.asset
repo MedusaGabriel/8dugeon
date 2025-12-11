@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Slime
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTypeData
   archetype: 0
-  enemyName: 
-  maxHp: 0
-  attack: 0
-  defense: 0
+  enemyName: Slime
+  maxHp: 100
+  attack: 10
+  defense: 5
   dodgeChance: 0
-  counterChance: 0
+  counterChance: 0.1

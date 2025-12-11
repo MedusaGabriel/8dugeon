@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "key": "PlayerTurnStart",
+      "templates": [
+        "É o turno de {heroName}. O que você decide fazer?",
+        "{heroName} se prepara para agir.",
+        "{heroName} observa {enemyName} e escolhe seu próximo movimento."
+      ]
+    },
+    {
+      "key": "EnemyTurnStart",
+      "templates": [
+        "{enemyName} se move ameaçadoramente.",
+        "Agora é a vez de {enemyName} atacar.",
+        "{enemyName} analisa os movimentos de {heroName}."
+      ]
+    },
+    {
+      "key": "PlayerAttackHit",
+      "templates": [
+        "{heroName} avança e acerta {enemyName}, causando {damage} de dano.",
+        "O golpe de {heroName} atinge em cheio, tirando {damage} de HP de {enemyName}.",
+        "{heroName} não hesita e fere {enemyName} ({damage} de dano)."
+      ]
+    },
+    {
+      "key": "EnemyAttackHit",
+      "templates": [
+        "{enemyName} ataca e causa {damage} de dano em {heroName}.",
+        "{heroName} é atingido por {enemyName}, perdendo {damage} de HP.",
+        "{enemyName} não perde a oportunidade e desfere um golpe: {damage} de dano em {heroName}."
+      ]
+    },
+    {
+      "key": "EnemyDefeated",
+      "templates": [
+        "{enemyName} cai ao chão. A batalha terminou.",
+        "{heroName} derrota {enemyName}.",
+        "{enemyName} não consegue continuar lutando."
+      ]
+    },
+    {
+      "key": "PlayerDefeated",
+      "templates": [
+        "{heroName} não consegue mais se manter de pé...",
+        "A visão de {heroName} escurece. A batalha termina em derrota.",
+        "{heroName} cai. Este não foi o melhor dia para lutar."
+      ]
+    }
+  ]
+}
