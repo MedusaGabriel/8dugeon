@@ -1,45 +1,50 @@
-public enum EnemyType
-{
-    Slime,
-    Esqueleto
-}
-
 public class EnemyStats
 {
+    public EnemyArchetype Archetype;
     public string Name;
-    public EnemyType Type;
 
     public int MaxHp;
     public int CurrentHp;
+
     public int Attack;
     public int Defense;
 
-    public EnemyStats(EnemyType type)
+    public float DodgeChance;
+    public float CounterChance;
+
+    public EnemyStats(
+        EnemyArchetype archetype,
+        string name,
+        int maxHp,
+        int attack,
+        int defense,
+        float dodgeChance,
+        float counterChance
+    )
     {
-        ApplyType(type);
+        Archetype = archetype;
+        Name = name;
+
+        MaxHp = maxHp;
+        CurrentHp = maxHp;
+
+        Attack = attack;
+        Defense = defense;
+
+        DodgeChance = dodgeChance;
+        CounterChance = counterChance;
     }
 
-    public void ApplyType(EnemyType type)
+    // Construtor fallback para compatibilidade
+    public EnemyStats(EnemyArchetype archetype)
     {
-        Type = type;
-
-        switch (type)
-        {
-            case EnemyType.Slime:
-                Name = "Slime";
-                MaxHp = 50;
-                Attack = 10;
-                Defense = 2;
-                break;
-
-            case EnemyType.Esqueleto:
-                Name = "Esqueleto";
-                MaxHp = 60;
-                Attack = 12;
-                Defense = 4;
-                break;
-        }
-
-        CurrentHp = MaxHp;
+        Archetype = archetype;
+        Name = "Criatura Desconhecida";
+        MaxHp = 60;
+        CurrentHp = 60;
+        Attack = 10;
+        Defense = 3;
+        DodgeChance = 0.05f;
+        CounterChance = 0.10f;
     }
 }

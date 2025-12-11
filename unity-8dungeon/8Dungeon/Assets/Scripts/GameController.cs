@@ -12,6 +12,8 @@ public enum GameState
 
 public class GameController : MonoBehaviour
 {
+    private string pendingHeroName;
+
     [Header("UI")]
     public TMP_Text messageText;
     public TMP_InputField commandInput;
@@ -31,7 +33,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        hero = new HeroStats();
+        hero = null;
         EnterHeroNameState();
     }
 
@@ -205,7 +207,7 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        hero.Name = input;
+        pendingHeroName = input;
         EnterHeroClassState();
     }
 
@@ -218,7 +220,7 @@ public class GameController : MonoBehaviour
             heroClass = HeroClass.Default;
         }
 
-        hero.ApplyClass(heroClass);
+        hero = HeroFactory.CreateHero(pendingHeroName, heroClass);
         EnterEnemyIntroState();
     }
 
@@ -248,16 +250,7 @@ public class GameController : MonoBehaviour
 
     private EnemyStats CreateRandomEnemy()
     {
-        float roll = Random.value;
-
-        if (roll < 0.5f)
-        {
-            return new EnemyStats(EnemyType.Slime);
-        }
-        else
-        {
-            return new EnemyStats(EnemyType.Esqueleto);
-        }
+        return EnemyFactory.CreateRandomEnemy();
     }
     private void UpdateStatusUI()
     {
