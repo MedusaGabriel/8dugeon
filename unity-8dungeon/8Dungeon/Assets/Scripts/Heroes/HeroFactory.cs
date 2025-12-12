@@ -29,14 +29,12 @@ public static class HeroFactory
 
             if (data == null)
             {
-                // Tenta pegar a classe Default
                 data = _cachedClasses.FirstOrDefault(c => c.heroClass == HeroClass.Default);
             }
         }
 
         if (data == null)
         {
-            // Fallback para não quebrar o jogo se faltar asset
             Debug.LogWarning("HeroFactory: Usando valores padrão hardcoded porque nenhum HeroClassData foi encontrado.");
             data = ScriptableObject.CreateInstance<HeroClassData>();
             data.heroClass = heroClass;
@@ -44,6 +42,7 @@ public static class HeroFactory
             data.attack = 10;
             data.defense = 5;
         }
+        
 
         var hero = new HeroStats
         {

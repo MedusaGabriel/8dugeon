@@ -215,6 +215,7 @@ public class GameController : MonoBehaviour
         }
 
         hero = HeroFactory.CreateHero(pendingHeroName, heroClass);
+        hero.ClassKey = heroClass.ToString().ToLowerInvariant();
         EnterEnemyIntroState();
     }
 

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "defaultKey": "default",
+  "sets": [
+    {
+      "key": "default",
+      "onEncounter": ["Uma presença estranha se aproxima..."],
+      "onAttack": ["Você ataca com cautela."],
+      "onAnalyze": ["Você observa atentamente o inimigo."]
+    },
+    {
+      "key": "mago",
+      "onEncounter": ["O ar vibra com energia arcana."],
+      "onAttack": ["Você canaliza mana e lança um feitiço!"],
+      "onAnalyze": ["Você procura padrões mágicos no corpo do inimigo."]
+    }
+  ]
+}

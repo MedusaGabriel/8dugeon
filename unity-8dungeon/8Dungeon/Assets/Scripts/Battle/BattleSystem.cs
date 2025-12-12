@@ -16,6 +16,8 @@ public class BattleSystem
     private readonly float _enemyDodgeChance;
     private readonly float _enemyCounterChanceOnDodge;
     private readonly float _playerPerfectBlockChance;
+    
+    private bool _firstEncounter = true;
 
     public BattleSystem(
         HeroStats hero,
@@ -30,12 +32,18 @@ public class BattleSystem
         _enemyDodgeChance = Mathf.Clamp01(enemyDodgeChance);
         _enemyCounterChanceOnDodge = Mathf.Clamp01(enemyCounterChanceOnDodge);
         _playerPerfectBlockChance = Mathf.Clamp01(playerPerfectBlockChance);
+        
+        // Narração ao encontrar o inimigo
+        NarrationController.Instance.Say(hero.ClassKey, NarrationEvent.EncounterStart);
     }
 
     // ====== AÇÕES DO JOGADOR ======
 
     public BattleRoundResult PlayerAttack()
     {
+        // Narração ao atacar
+        NarrationController.Instance.Say(_hero.ClassKey, NarrationEvent.PlayerAttack);
+        
         var result = new BattleRoundResult();
 
         // 1) Tenta desviar
@@ -97,6 +105,9 @@ public class BattleSystem
 
     public BattleRoundResult PlayerDefend()
     {
+        // Narração ao defender
+        NarrationController.Instance.Say(_hero.ClassKey, NarrationEvent.PlayerDefend);
+        
         var result = new BattleRoundResult();
 
         string msg =
@@ -104,6 +115,26 @@ public class BattleSystem
 
         string afterDefense = EnemyAttackInternal(msg, playerDefending: true, result: result);
         result.Message = afterDefense;
+        return result;
+    }
+    
+    public BattleRoundResult PlayerAnalyze()
+    {
+        // Narração ao analisar
+        NarrationController.Instance.Say(_hero.ClassKey, NarrationEvent.PlayerAnalyze);
+        
+        var result = new BattleRoundResult();
+
+        string msg = 
+            $"Você analisa o {_enemy.Name} cuidadosamente...\n\n" +
+            $"Nome: {_enemy.Name}\n" +
+            $"HP: {_enemy.CurrentHp}/{_enemy.MaxHp}\n" +
+            $"Ataque: {_enemy.Attack}\n" +
+            $"Defesa: {_enemy.Defense}\n\n" +
+            $"O {_enemy.Name} aproveita a distração e ataca!";
+
+        string afterAnalyze = EnemyAttackInternal(msg, playerDefending: false, result: result);
+        result.Message = afterAnalyze;
         return result;
     }
 

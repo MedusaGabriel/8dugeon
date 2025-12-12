@@ -42,40 +42,33 @@ public class NarrationService
         }
     }
 
-    public void RaiseEvent(NarrationEvent evt, Action<string> outputCallback)
+    public void RaiseEvent(NarrationContext ctx, Action<string> outputCallback)
     {
-        if (!_templatesByKey.TryGetValue(evt.Key, out var templates) || templates.Count == 0)
+        if (!_templatesByKey.TryGetValue(ctx.Key, out var templates) || templates.Count == 0)
         {
-            outputCallback?.Invoke($"[Sem narração configurada para {evt.Key}]");
+            outputCallback?.Invoke($"[Sem narração configurada para {ctx.Key}]");
             return;
         }
 
         int idx = _rng.Next(templates.Count);
         string raw = templates[idx];
 
-        string resolved = ResolvePlaceholders(raw, evt);
-
+        string resolved = ResolvePlaceholders(raw, ctx);
         outputCallback?.Invoke(resolved);
     }
 
-    private string ResolvePlaceholders(string template, NarrationEvent evt)
+    private string ResolvePlaceholders(string template, NarrationContext ctx)
     {
         string result = template;
 
-        if (evt.Hero != null)
-        {
-            result = result.Replace("{heroName}", evt.Hero.Name);
-        }
+        if (ctx.Hero != null)
+            result = result.Replace("{heroName}", ctx.Hero.Name);
 
-        if (evt.Enemy != null)
-        {
-            result = result.Replace("{enemyName}", evt.Enemy.Name);
-        }
+        if (ctx.Enemy != null)
+            result = result.Replace("{enemyName}", ctx.Enemy.Name);
 
-        if (evt.Damage > 0)
-        {
-            result = result.Replace("{damage}", evt.Damage.ToString());
-        }
+        if (ctx.Damage > 0)
+            result = result.Replace("{damage}", ctx.Damage.ToString());
 
         return result;
     }

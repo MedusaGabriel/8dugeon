@@ -13,14 +13,18 @@ public class NarrationDatabaseData
     public List<NarrationEntry> entries;
 }
 
-public struct NarrationEvent
+public struct NarrationContext
 {
     public NarrationKey Key;
     public HeroStats Hero;
     public EnemyStats Enemy;
     public int Damage;
 
-    public NarrationEvent(NarrationKey key, HeroStats hero, EnemyStats enemy, int damage = 0)
+    public NarrationContext(
+        NarrationKey key,
+        HeroStats hero,
+        EnemyStats enemy,
+        int damage = 0)
     {
         Key = key;
         Hero = hero;
@@ -28,3 +32,4 @@ public struct NarrationEvent
         Damage = damage;
     }
 }
+

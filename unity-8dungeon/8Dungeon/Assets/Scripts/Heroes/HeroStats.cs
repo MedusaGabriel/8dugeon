@@ -8,7 +8,9 @@ public enum HeroClass
 public class HeroStats
 {
     public string Name;
+
     public HeroClass Class;
+    public string ClassKey;
 
     public int MaxHp;
     public int CurrentHp;
