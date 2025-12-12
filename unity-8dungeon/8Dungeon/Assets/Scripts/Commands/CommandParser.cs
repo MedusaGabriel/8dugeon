@@ -16,6 +16,9 @@ public static class CommandParser
         if (lower.Contains("fug") || lower.Contains("sair"))
             return AcaoJogador.Fugir;
 
+        if (lower.Contains("anal"))
+            return AcaoJogador.Analisar;
+
         return AcaoJogador.Invalida;
     }
 }

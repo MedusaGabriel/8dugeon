@@ -51,6 +51,10 @@ public class BattleController
                 result = _battleSystem.PlayerFlee();
                 break;
 
+            case AcaoJogador.Analisar:
+                result = _battleSystem.PlayerAnalyze();
+                break;
+
             default:
                 // De propósito: se ação não reconhecida chegar até aqui, é bug de quem chamou.
                 throw new InvalidOperationException($"Ação de jogador inválida: {acao}");

@@ -16,6 +16,8 @@ public class HeroNarrationSet
 
     public List<string> onEncounter = new List<string>();
     public List<string> onAttack = new List<string>();
+
+    public List<string> onDefend = new List<string>();
     public List<string> onAnalyze = new List<string>();
 
     public List<string> GetLines(NarrationEvent evt)
@@ -25,6 +27,7 @@ public class HeroNarrationSet
             case NarrationEvent.EncounterStart: return onEncounter;
             case NarrationEvent.PlayerAttack: return onAttack;
             case NarrationEvent.PlayerAnalyze: return onAnalyze;
+            case NarrationEvent.PlayerDefend: return onDefend;
             default: return s_empty;
         }
     }

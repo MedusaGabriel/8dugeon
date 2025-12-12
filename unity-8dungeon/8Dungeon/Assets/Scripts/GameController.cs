@@ -52,7 +52,7 @@ public class GameController : MonoBehaviour
     private void EnterHeroClassState()
     {
         currentState = GameState.HeroClass;
-        messageText.text = "Digite a classe do seu herói (Mago ou Guerreiro):";
+        messageText.text = "Digite a classe do seu herói:";
         commandInput.text = "";
         commandInput.ActivateInputField();
     }
@@ -127,7 +127,7 @@ public class GameController : MonoBehaviour
         messageText.text =
             $"Inimigo: {enemy.Name} HP {enemy.CurrentHp}/{enemy.MaxHp}\n" +
             $"Herói: {hero.Name} HP {hero.CurrentHp}/{hero.MaxHp}\n\n" +
-            "O que você faz? (atacar / defender / fugir)";
+            "O que você faz? (atacar | defender | fugir | analisar )";
 
         commandInput.text = "";
         commandInput.ActivateInputField();
@@ -138,7 +138,7 @@ public class GameController : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            messageText.text += "\n\nComando vazio. Escreva algo (atacar / defender / fugir).";
+            messageText.text += "\n\nComando vazio. Escreva algo (atacar | defender | fugir | analisar ).";
             commandInput.text = "";
             commandInput.ActivateInputField();
             return;
@@ -149,6 +149,7 @@ public class GameController : MonoBehaviour
         // Se a ação não é uma das conhecidas, trata como inválida
         if (acao != AcaoJogador.Atacar &&
             acao != AcaoJogador.Defender &&
+            acao != AcaoJogador.Analisar &&
             acao != AcaoJogador.Fugir)
         {
             messageText.text += "\n\nComando não reconhecido. Tente: atacar, defender ou fugir.";

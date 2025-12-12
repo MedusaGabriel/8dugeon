@@ -12,7 +12,15 @@
       "key": "mago",
       "onEncounter": ["O ar vibra com energia arcana."],
       "onAttack": ["Você canaliza mana e lança um feitiço!"],
+      "onDefend": ["Voce levantar um shield magico a sua frente"],
       "onAnalyze": ["Você procura padrões mágicos no corpo do inimigo."]
+    },
+        {
+      "key": "guerreiro",
+      "onEncounter": ["Espada pesa."],
+      "onAttack": ["Você balança sua espada em um ataque certeiro"],
+      "onDefend": ["Você usa sua espada para para o ataque"],
+      "onAnalyze": ["Você usa seus sentidos para analisar seu inimigo."]
     }
   ]
 }

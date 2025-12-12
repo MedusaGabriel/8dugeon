@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e9411d5e2827f54ba6aeb7121e486b4, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: Assembly-CSharp::HeroClassData
-  heroClass: 0
+  heroClass: 2
   maxHp: 120
   attack: 12
   defense: 5
