@@ -1,0 +1,106 @@
+{
+  "defaultNoReveal": {
+    "appear": [
+      "Uma presença desconhecida surge das sombras.",
+      "Você sente algo observando, mas não consegue distinguir sua forma."
+    ],
+    "attack": [
+      "A silhueta indefinida avança sem se revelar.",
+      "A criatura escondida ataca em um movimento borrado."
+    ],
+    "defend": [
+      "A criatura desconhecida tenta se proteger de forma improvisada."
+    ],
+    "hurt": [
+      "Algo se contrai no escuro quando você acerta o golpe."
+    ],
+    "death": [
+      "A forma misteriosa desfaz-se no chão sem nunca mostrar o que era."
+    ]
+  },
+  "defaultReveal": {
+    "reveal": [
+      "Você identifica {enemyName}!"
+    ],
+    "attack": [
+      "{enemyName} avança confiante para atacar."
+    ],
+    "defend": [
+      "{enemyName} levanta a guarda na última hora."
+    ],
+    "hurt": [
+      "{enemyName} cambaleia com o golpe."
+    ],
+    "death": [
+      "{enemyName} cai derrotado." ,
+      "{enemyName} dá seu último suspiro." ]
+  },
+  "sets": [
+    {
+      "archetype": "Slime",
+      "noReveal": {
+        "appear": [
+          "Uma massa gelatinosa pulsa de forma indefinida à sua frente.",
+          "Gotas viscosas se juntam e formam algo ainda sem identidade."
+        ],
+        "attack": [
+          "A massa viscosa salta sem entregar o que realmente é.",
+          "A criatura borbulha e avança em um jato de gosma misteriosa."
+        ],
+        "hurt": [
+          "Parte da gosma espirra quando o golpe acerta a forma desconhecida."
+        ],
+        "death": [
+          "A massa gelatinosa colapsa, deixando apenas um resíduo pegajoso."
+        ]
+      },
+      "reveal": {
+        "reveal": [
+          "É um Slime! A superfície translúcida vibra ameaçadoramente."
+        ],
+        "attack": [
+          "O Slime arremessa um jato de gosma pegajosa."
+        ],
+        "hurt": [
+          "O Slime treme e perde parte de sua massa.",
+          "O Slime chia quando você corta sua superfície." ],
+        "death": [
+          "O Slime perde a forma e vira apenas uma poça translúcida."
+        ]
+      }
+    },
+    {
+      "archetype": "Esqueleto",
+      "noReveal": {
+        "appear": [
+          "Um vulto ossudo chacoalha no escuro, sem revelar sua origem.",
+          "Você ouve ossos raspando, mas não identifica a criatura."
+        ],
+        "attack": [
+          "A figura esguia investe com movimentos secos.",
+          "O vulto armado golpeia a partir das sombras."
+        ],
+        "hurt": [
+          "Fragmentos voam quando o ataque acerta o inimigo oculto."
+        ],
+        "death": [
+          "Os ossos se espalham pelo chão sem mostrar quem eram."
+        ]
+      },
+      "reveal": {
+        "reveal": [
+          "É um Esqueleto armado, rangendo cada junta ao se erguer."
+        ],
+        "attack": [
+          "O Esqueleto desfere um golpe preciso com a lâmina enferrujada."
+        ],
+        "hurt": [
+          "O Esqueleto perde alguns ossos, mas continua lutando."
+        ],
+        "death": [
+          "O Esqueleto desaba em escombros de ossos rachados."
+        ]
+      }
+    }
+  ]
+}

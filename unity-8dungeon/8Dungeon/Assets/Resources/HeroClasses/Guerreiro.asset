@@ -16,3 +16,4 @@ MonoBehaviour:
   maxHp: 150
   attack: 15
   defense: 10
+  classDescription: Guerreiro treinado para aguentar pancadas e contra-atacar com forca.

@@ -18,6 +18,10 @@ public class BattleSystem
     private readonly float _playerPerfectBlockChance;
     
     private bool _firstEncounter = true;
+    private bool _enemyRevealed;
+
+    private const string UnknownEnemySubject = "A criatura desconhecida";
+    private const string UnknownEnemyObject = "a criatura desconhecida";
 
     public BattleSystem(
         HeroStats hero,
@@ -32,17 +36,23 @@ public class BattleSystem
         _enemyDodgeChance = Mathf.Clamp01(enemyDodgeChance);
         _enemyCounterChanceOnDodge = Mathf.Clamp01(enemyCounterChanceOnDodge);
         _playerPerfectBlockChance = Mathf.Clamp01(playerPerfectBlockChance);
+        _enemyRevealed = false;
         
         // Narração ao encontrar o inimigo
-        NarrationController.Instance.Say(hero.ClassKey, NarrationEvent.EncounterStart);
+        var narration = NarrationController.Instance;
+        if (narration != null)
+        {
+            narration.Say(hero.ClassKey, NarrationEvent.EncounterStart);
+            narration.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Appear, EnemyNarrationName);
+        }
     }
 
     // ====== AÇÕES DO JOGADOR ======
 
     public BattleRoundResult PlayerAttack()
     {
-        // Narração ao atacar
-        NarrationController.Instance.Say(_hero.ClassKey, NarrationEvent.PlayerAttack);
+        var narration = NarrationController.Instance;
+        narration?.Say(_hero.ClassKey, NarrationEvent.PlayerAttack);
         
         var result = new BattleRoundResult();
 
@@ -51,15 +61,26 @@ public class BattleSystem
 
         if (dodged)
         {
+            narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Defend, EnemyNarrationName);
+
             string msg =
-                $"Você atacou o {_enemy.Name}, mas ele DESVIOU do seu ataque!\n" +
-                $"HP do inimigo: {_enemy.CurrentHp}/{_enemy.MaxHp}";
+                $"Você atacou {EnemyObject}, mas o ataque foi desviado!";
+
+            if (_enemyRevealed)
+            {
+                msg += $"\n{EnemySubject} permanece ileso ({_enemy.CurrentHp}/{_enemy.MaxHp} HP).";
+            }
+            else
+            {
+                msg += "\nA criatura continua sem revelar sua verdadeira forma.";
+            }
 
             // 2) Pode contra-atacar
             bool counter = EnemyCounterAttackOnDodge();
             if (counter)
             {
-                msg += $"\n\nO {_enemy.Name} aproveita a abertura e contra-ataca!";
+                narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Attack, EnemyNarrationName);
+                msg += $"\n\n{EnemySubject} aproveita a abertura e contra-ataca!";
                 string afterCounter = EnemyAttackInternal(msg, playerDefending: false, result: result);
                 result.Message = afterCounter;
             }
@@ -80,12 +101,23 @@ public class BattleSystem
             int damage = CalculateDamage(_hero.Attack, _enemy.Defense);
             _enemy.CurrentHp = Mathf.Max(0, _enemy.CurrentHp - damage);
 
+            narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Hurt, EnemyNarrationName);
+
             string msg =
-                $"Você atacou o {_enemy.Name} e causou {damage} de dano.\n" +
-                $"HP do inimigo: {_enemy.CurrentHp}/{_enemy.MaxHp}";
+                $"Você atacou {EnemyObject} e causou {damage} de dano.";
+
+            if (_enemyRevealed)
+            {
+                msg += $"\n{EnemySubject} agora está com {_enemy.CurrentHp}/{_enemy.MaxHp} HP.";
+            }
+            else
+            {
+                msg += "\nMesmo ferida, a criatura ainda não se revela.";
+            }
 
             if (_enemy.CurrentHp <= 0)
             {
+                narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Death, EnemyNarrationName);
                 msg += "\n\nO inimigo foi derrotado! Você venceu a batalha.";
                 result.Message = msg;
                 result.BattleEnded = true;
@@ -111,7 +143,7 @@ public class BattleSystem
         var result = new BattleRoundResult();
 
         string msg =
-            $"Você se prepara para defender o ataque do {_enemy.Name}...";
+            $"Você se prepara para defender o ataque de {EnemyObject}...";
 
         string afterDefense = EnemyAttackInternal(msg, playerDefending: true, result: result);
         result.Message = afterDefense;
@@ -121,17 +153,31 @@ public class BattleSystem
     public BattleRoundResult PlayerAnalyze()
     {
         // Narração ao analisar
-        NarrationController.Instance.Say(_hero.ClassKey, NarrationEvent.PlayerAnalyze);
+        var narration = NarrationController.Instance;
+        narration?.Say(_hero.ClassKey, NarrationEvent.PlayerAnalyze);
         
         var result = new BattleRoundResult();
 
-        string msg = 
-            $"Você analisa o {_enemy.Name} cuidadosamente...\n\n" +
+        bool alreadyRevealed = _enemyRevealed;
+        _enemyRevealed = true;
+
+        if (!alreadyRevealed)
+        {
+            narration?.SayEnemy(_enemy, true, EnemyNarrationEvent.Reveal, _enemy.Name);
+        }
+
+        string intro = alreadyRevealed
+            ? $"Você reavalia {_enemy.Name} em busca de novas fraquezas...\n\n"
+            : "Você analisa a criatura desconhecida com toda atenção...\n\n";
+
+        string details =
             $"Nome: {_enemy.Name}\n" +
             $"HP: {_enemy.CurrentHp}/{_enemy.MaxHp}\n" +
             $"Ataque: {_enemy.Attack}\n" +
-            $"Defesa: {_enemy.Defense}\n\n" +
-            $"O {_enemy.Name} aproveita a distração e ataca!";
+            $"Defesa: {_enemy.Defense}\n\n";
+
+        string msg = intro + details +
+            $"{EnemySubject} aproveita a distração e ataca!";
 
         string afterAnalyze = EnemyAttackInternal(msg, playerDefending: false, result: result);
         result.Message = afterAnalyze;
@@ -160,6 +206,7 @@ public class BattleSystem
     {
         int damage;
         string defenseText = "";
+        var narration = NarrationController.Instance;
 
         if (playerDefending)
         {
@@ -183,17 +230,19 @@ public class BattleSystem
             damage = CalculateDamage(_enemy.Attack, _hero.Defense);
         }
 
+        narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Attack, EnemyNarrationName);
+
         _hero.CurrentHp = Mathf.Max(0, _hero.CurrentHp - damage);
 
         string msg = previousMessage + "\n\n";
 
         if (playerDefending)
         {
-            msg += $"{_enemy.Name} atacou!\n{defenseText}\n";
+            msg += $"{EnemySubject} atacou!\n{defenseText}\n";
         }
         else
         {
-            msg += $"O {_enemy.Name} atacou você e causou {damage} de dano.\n";
+            msg += $"{EnemySubject} atacou você e causou {damage} de dano.\n";
         }
 
         msg += $"Seu HP: {_hero.CurrentHp}/{_hero.MaxHp}";
@@ -243,4 +292,8 @@ public class BattleSystem
         float roll = Random.value;
         return roll < _enemyCounterChanceOnDodge;
     }
+
+    private string EnemySubject => _enemyRevealed ? $"O {_enemy.Name}" : UnknownEnemySubject;
+    private string EnemyObject => _enemyRevealed ? $"o {_enemy.Name}" : UnknownEnemyObject;
+    private string EnemyNarrationName => _enemyRevealed ? _enemy.Name : "o inimigo desconhecido";
 }

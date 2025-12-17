@@ -9,4 +9,8 @@ public class HeroClassData : ScriptableObject
     public int maxHp;
     public int attack;
     public int defense;
+
+    [Header("Descrição")]
+    [TextArea]
+    public string classDescription;
 }

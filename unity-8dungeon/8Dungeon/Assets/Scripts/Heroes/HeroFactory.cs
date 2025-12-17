@@ -41,6 +41,7 @@ public static class HeroFactory
             data.maxHp = 100;
             data.attack = 10;
             data.defense = 5;
+            data.classDescription = "Heroi versatil sem vantagens claras.";
         }
         
 
@@ -51,7 +52,8 @@ public static class HeroFactory
             MaxHp = data.maxHp,
             CurrentHp = data.maxHp,
             Attack = data.attack,
-            Defense = data.defense
+            Defense = data.defense,
+            ClassDescription = data.classDescription
         };
 
         return hero;

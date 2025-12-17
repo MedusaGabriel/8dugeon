@@ -16,3 +16,4 @@ MonoBehaviour:
   maxHp: 100
   attack: 20
   defense: 5
+  classDescription: Mago que prefere atacar a distancia com magia poderosa mas defesa baixa.

@@ -16,3 +16,4 @@ MonoBehaviour:
   maxHp: 120
   attack: 12
   defense: 5
+  classDescription: Aventureiro equilibrado sem pontos fortes extremos.
