@@ -1,9 +1,1 @@
-public enum NarrationKey
-{
-    PlayerTurnStart,
-    EnemyTurnStart,
-    PlayerAttackHit,
-    EnemyAttackHit,
-    EnemyDefeated,
-    PlayerDefeated
-}
+// Legacy enumeration kept intentionally blank after deprecating NarrationService.

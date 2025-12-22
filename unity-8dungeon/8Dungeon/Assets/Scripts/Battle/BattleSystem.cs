@@ -66,14 +66,7 @@ public class BattleSystem
             string msg =
                 $"Você atacou {EnemyObject}, mas o ataque foi desviado!";
 
-            if (_enemyRevealed)
-            {
-                msg += $"\n{EnemySubject} permanece ileso ({_enemy.CurrentHp}/{_enemy.MaxHp} HP).";
-            }
-            else
-            {
-                msg += "\nA criatura continua sem revelar sua verdadeira forma.";
-            }
+            msg += $"\n{DescribeEnemyEvasion()}";
 
             // 2) Pode contra-atacar
             bool counter = EnemyCounterAttackOnDodge();
@@ -87,10 +80,7 @@ public class BattleSystem
             else
             {
                 // Apenas desviou, sem contra-ataque
-                result.Message = msg;
-                result.BattleEnded = false;
-                result.PlayerDied = false;
-                result.EnemyDied = false;
+                PopulateResult(result, msg, battleEnded: false, playerDied: false, enemyDied: false);
             }
 
             return result;
@@ -106,23 +96,13 @@ public class BattleSystem
             string msg =
                 $"Você atacou {EnemyObject} e causou {damage} de dano.";
 
-            if (_enemyRevealed)
-            {
-                msg += $"\n{EnemySubject} agora está com {_enemy.CurrentHp}/{_enemy.MaxHp} HP.";
-            }
-            else
-            {
-                msg += "\nMesmo ferida, a criatura ainda não se revela.";
-            }
+            msg += $"\n{DescribeEnemyHealthAfterHit()}";
 
             if (_enemy.CurrentHp <= 0)
             {
                 narration?.SayEnemy(_enemy, _enemyRevealed, EnemyNarrationEvent.Death, EnemyNarrationName);
                 msg += "\n\nO inimigo foi derrotado! Você venceu a batalha.";
-                result.Message = msg;
-                result.BattleEnded = true;
-                result.PlayerDied = false;
-                result.EnemyDied = true;
+                PopulateResult(result, msg, battleEnded: true, playerDied: false, enemyDied: true);
                 return result;
             }
             else
@@ -192,12 +172,36 @@ public class BattleSystem
             "Você decidiu fugir da batalha.\n" +
             "Você escapa em segurança, mas a luta termina aqui.";
 
-        result.Message = msg;
-        result.BattleEnded = true;
-        result.PlayerDied = false;
-        result.EnemyDied = false;
+        PopulateResult(result, msg, battleEnded: true, playerDied: false, enemyDied: false);
 
         return result;
+    }
+
+    private string DescribeEnemyEvasion()
+    {
+        return _enemyRevealed
+            ? $"{EnemySubject} permanece ileso ({_enemy.CurrentHp}/{_enemy.MaxHp} HP)."
+            : "A criatura continua sem revelar sua verdadeira forma.";
+    }
+
+    private string DescribeEnemyHealthAfterHit()
+    {
+        return _enemyRevealed
+            ? $"{EnemySubject} agora está com {_enemy.CurrentHp}/{_enemy.MaxHp} HP."
+            : "Mesmo ferida, a criatura ainda não se revela.";
+    }
+
+    private static void PopulateResult(
+        BattleRoundResult result,
+        string message,
+        bool battleEnded,
+        bool playerDied,
+        bool enemyDied)
+    {
+        result.Message = message;
+        result.BattleEnded = battleEnded;
+        result.PlayerDied = playerDied;
+        result.EnemyDied = enemyDied;
     }
 
     // ====== LÓGICA INTERNA DO ATAQUE DO INIMIGO ======
@@ -247,18 +251,15 @@ public class BattleSystem
 
         msg += $"Seu HP: {_hero.CurrentHp}/{_hero.MaxHp}";
 
-        if (_hero.CurrentHp <= 0)
+        bool heroDefeated = _hero.CurrentHp <= 0;
+        if (heroDefeated)
         {
             msg += "\n\nVocê foi derrotado.";
-            result.BattleEnded = true;
-            result.PlayerDied = true;
-            result.EnemyDied = false;
+            PopulateResult(result, msg, battleEnded: true, playerDied: true, enemyDied: false);
         }
         else
         {
-            result.BattleEnded = false;
-            result.PlayerDied = false;
-            result.EnemyDied = false;
+            PopulateResult(result, msg, battleEnded: false, playerDied: false, enemyDied: false);
         }
 
         return msg;

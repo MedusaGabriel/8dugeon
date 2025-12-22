@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour
     public TMP_InputField commandInput;
     public TMP_Text heroStatusText;
 
+    private const string PlayerTurnPrompt = "O que você faz? (atacar | defender | fugir | analisar)";
+
 
     [Header("Chances de Batalha")]
     [Range(0f, 1f)] public float enemyDodgeChance = 0.2f;
@@ -30,8 +32,8 @@ public class GameController : MonoBehaviour
     private GameState currentState;
     private HeroStats hero;
     private EnemyStats enemy;
-    private BattleController battleController;
-    private readonly StringBuilder narrationBuffer = new StringBuilder();
+    private BattleSystem battleSystem;
+    private NarrationFeed narrationFeed;
     private bool narrationSubscribed;
 
     private void Awake()
@@ -41,6 +43,7 @@ public class GameController : MonoBehaviour
             commandInput.onSubmit.AddListener(HandleCommandSubmitted);
         }
 
+        narrationFeed = new NarrationFeed(narrationText);
         TrySubscribeToNarration();
     }
 
@@ -78,16 +81,14 @@ public class GameController : MonoBehaviour
     {
         currentState = GameState.HeroName;
         SetNarration("Bem-vindo ao 8Dungeon!");
-        SetPrompt("Digite o nome do seu herói:");
-        ClearAndFocusInput();
+        ShowPrompt("Digite o nome do seu herói:");
     }
 
     private void EnterHeroClassState()
     {
         currentState = GameState.HeroClass;
         SetNarration($"Herói: {pendingHeroName}");
-        SetPrompt("Digite a classe do seu herói:");
-        ClearAndFocusInput();
+        ShowPrompt("Digite a classe do seu herói:");
     }
 
     private void EnterEnemyIntroState()
@@ -99,7 +100,7 @@ public class GameController : MonoBehaviour
         ClearNarration();
         AppendNarration($"Herói criado: {hero.Name} ({hero.Class}).");
 
-        battleController = new BattleController(
+        battleSystem = new BattleSystem(
             hero,
             enemy,
             enemyDodgeChance,
@@ -107,8 +108,7 @@ public class GameController : MonoBehaviour
             playerPerfectBlockChance
         );
 
-        SetPrompt("Pressione Enter para iniciar a batalha.");
-        ClearAndFocusInput();
+        ShowPrompt("Pressione Enter para iniciar a batalha.");
 
         UpdateStatusUI();
     }
@@ -157,8 +157,7 @@ public class GameController : MonoBehaviour
 
         SetNarration("A criatura observa seus movimentos, aguardando sua ação.");
 
-        SetPrompt("O que você faz? (atacar | defender | fugir | analisar)");
-        ClearAndFocusInput();
+        ShowPrompt(PlayerTurnPrompt);
         UpdateStatusUI();
     }
 
@@ -166,8 +165,7 @@ public class GameController : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            SetPrompt("Comando vazio. Digite atacar, defender, fugir ou analisar.");
-            ClearAndFocusInput();
+            ShowPrompt("Comando vazio. Digite atacar, defender, fugir ou analisar.");
             return;
         }
 
@@ -179,17 +177,40 @@ public class GameController : MonoBehaviour
             acao != AcaoJogador.Analisar &&
             acao != AcaoJogador.Fugir)
         {
-            SetPrompt("Comando não reconhecido. Use atacar, defender, fugir ou analisar.");
-            ClearAndFocusInput();
+            ShowPrompt("Comando não reconhecido. Use atacar, defender, fugir ou analisar.");
             return;
         }
 
         ClearNarration();
 
-        // Agora delega para o BattleController
-        BattleRoundResult result = battleController.ExecutePlayerAction(acao);
+        // Agora delega direto ao BattleSystem
+        BattleRoundResult result = ExecuteBattleAction(acao);
 
         ApplyBattleResult(result);
+    }
+
+    private BattleRoundResult ExecuteBattleAction(AcaoJogador acao)
+    {
+        if (battleSystem == null)
+        {
+            Debug.LogError("[GameController] BattleSystem não inicializado antes de executar ações.");
+            return null;
+        }
+
+        switch (acao)
+        {
+            case AcaoJogador.Atacar:
+                return battleSystem.PlayerAttack();
+            case AcaoJogador.Defender:
+                return battleSystem.PlayerDefend();
+            case AcaoJogador.Fugir:
+                return battleSystem.PlayerFlee();
+            case AcaoJogador.Analisar:
+                return battleSystem.PlayerAnalyze();
+            default:
+                Debug.LogError($"[GameController] Ação de jogador inválida: {acao}");
+                return null;
+        }
     }
 
 
@@ -204,15 +225,13 @@ public class GameController : MonoBehaviour
         {
             currentState = GameState.BattleEnd;
             AppendNarration(result.Message);
-            SetPrompt("Fim da batalha.");
-            ClearAndFocusInput(false);
+            ShowPrompt("Fim da batalha.", false);
         }
         else
         {
             currentState = GameState.PlayerTurn;
             AppendNarration(result.Message);
-            SetPrompt("O que você faz? (atacar | defender | fugir | analisar)");
-            ClearAndFocusInput();
+            ShowPrompt(PlayerTurnPrompt);
         }
     }
 
@@ -224,8 +243,7 @@ public class GameController : MonoBehaviour
     {
         if (string.IsNullOrEmpty(input))
         {
-            SetPrompt("Nome vazio é proibido. Digite um nome para o seu herói:");
-            ClearAndFocusInput();
+            ShowPrompt("Nome vazio é proibido. Digite um nome para o seu herói:");
             return;
         }
 
@@ -304,6 +322,12 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void ShowPrompt(string text, bool enableInput = true)
+    {
+        SetPrompt(text);
+        ClearAndFocusInput(enableInput);
+    }
+
     private void ClearAndFocusInput(bool enableInput = true)
     {
         if (commandInput == null)
@@ -349,40 +373,72 @@ public class GameController : MonoBehaviour
 
     private void SetNarration(string text)
     {
-        ClearNarration();
-        AppendNarration(text);
+        narrationFeed?.Set(text);
     }
 
     private void AppendNarration(string text)
     {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return;
-        }
-
-        if (narrationBuffer.Length > 0)
-        {
-            narrationBuffer.Append("\n\n");
-        }
-
-        narrationBuffer.Append(text);
-
-        if (narrationText != null)
-        {
-            narrationText.text = narrationBuffer.ToString();
-        }
+        narrationFeed?.Append(text);
     }
 
     private void ClearNarration()
     {
-        narrationBuffer.Clear();
-
-        if (narrationText != null)
-        {
-            narrationText.text = string.Empty;
-        }
+        narrationFeed?.Clear();
     }
 
 
     #endregion
+
+    private sealed class NarrationFeed
+    {
+        private readonly TMP_Text _target;
+        private readonly StringBuilder _buffer = new StringBuilder();
+
+        public NarrationFeed(TMP_Text target)
+        {
+            _target = target;
+            Refresh();
+        }
+
+        public void Set(string text)
+        {
+            _buffer.Clear();
+            AppendInternal(text, false);
+        }
+
+        public void Append(string text)
+        {
+            AppendInternal(text, true);
+        }
+
+        public void Clear()
+        {
+            _buffer.Clear();
+            Refresh();
+        }
+
+        private void AppendInternal(string text, bool separate)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            if (separate && _buffer.Length > 0)
+            {
+                _buffer.Append("\n\n");
+            }
+
+            _buffer.Append(text);
+            Refresh();
+        }
+
+        private void Refresh()
+        {
+            if (_target != null)
+            {
+                _target.text = _buffer.ToString();
+            }
+        }
+    }
 }
