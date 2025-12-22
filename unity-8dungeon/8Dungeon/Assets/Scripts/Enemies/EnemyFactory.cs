@@ -39,10 +39,15 @@ public static class EnemyFactory
         if (_cachedEnemies == null || _cachedEnemies.Length == 0)
         {
             // fallback de segurança -> só aqui entra o Default
+            Debug.LogWarning("[EnemyFactory] Nenhum inimigo válido encontrado, usando Default.");
             return new EnemyStats(EnemyArchetype.Default);
         }
 
         var data = _cachedEnemies[Random.Range(0, _cachedEnemies.Length)];
+
+        Debug.Log(
+            $"[EnemyFactory] Sorteado inimigo: nome='{data.enemyName}', archetype={data.archetype}, HP={data.maxHp}, ATK={data.attack}, DEF={data.defense}, Dodge={data.dodgeChance}, Counter={data.counterChance}"
+        );
 
         return new EnemyStats(
             data.archetype,
