@@ -6,6 +6,7 @@ public enum GameState
 {
     HeroName,
     HeroClass,
+    Exploration,
     EnemyIntro,
     PlayerTurn,
     BattleEnd
@@ -20,9 +21,13 @@ public class GameController : MonoBehaviour
     public TMP_Text promptText;
     public TMP_InputField commandInput;
     public TMP_Text heroStatusText;
+    [SerializeField] private GridViewController gridView;
 
     private const string PlayerTurnPrompt = "O que você faz? (atacar | defender | fugir | analisar)";
 
+
+    [Header("Exploração")]
+    [Range(0f, 1f)] public float encounterChancePerStep = 0.25f;
 
     [Header("Chances de Batalha")]
     [Range(0f, 1f)] public float enemyDodgeChance = 0.2f;
@@ -33,6 +38,8 @@ public class GameController : MonoBehaviour
     private HeroStats hero;
     private EnemyStats enemy;
     private BattleSystem battleSystem;
+    private ExplorationManager explorationManager;
+    private Vector2Int? pendingEncounterPosition;
     private NarrationFeed narrationFeed;
     private bool narrationSubscribed;
 
@@ -52,6 +59,7 @@ public class GameController : MonoBehaviour
     {
         Random.InitState(System.Environment.TickCount);
         hero = null;
+        explorationManager = new ExplorationManager(encounterChancePerStep);
         TrySubscribeToNarration();
         EnterHeroNameState();
     }
@@ -91,22 +99,36 @@ public class GameController : MonoBehaviour
         ShowPrompt("Digite a classe do seu herói:");
     }
 
-    private void EnterEnemyIntroState()
+    private void EnterExplorationState(bool initialEntry = false)
+    {
+        currentState = GameState.Exploration;
+
+        if (explorationManager == null)
+        {
+            explorationManager = new ExplorationManager(encounterChancePerStep);
+        }
+
+        if (initialEntry)
+        {
+            SetNarration("Você desperta nos corredores da dungeon, pronto para explorar.");
+        }
+        else
+        {
+            AppendNarration("Você retoma a exploração pelos corredores.");
+        }
+
+        UpdateExplorationView();
+        ShowPrompt("Como você avança? (ex: andar 2 passos)");
+    }
+
+    private void EnterEnemyIntroState(string introMessage = null)
     {
         currentState = GameState.EnemyIntro;
 
-        enemy = CreateRandomEnemy();
-
-        ClearNarration();
-        AppendNarration($"Herói criado: {hero.Name} ({hero.Class}).");
-
-        battleSystem = new BattleSystem(
-            hero,
-            enemy,
-            enemyDodgeChance,
-            enemyCounterChanceOnDodge,
-            playerPerfectBlockChance
-        );
+        if (!string.IsNullOrWhiteSpace(introMessage))
+        {
+            AppendNarration(introMessage);
+        }
 
         ShowPrompt("Pressione Enter para iniciar a batalha.");
 
@@ -135,6 +157,10 @@ public class GameController : MonoBehaviour
 
             case GameState.HeroClass:
                 HandleHeroClassInput(text);
+                break;
+
+            case GameState.Exploration:
+                HandleExplorationInput(text);
                 break;
 
             case GameState.EnemyIntro:
@@ -189,6 +215,70 @@ public class GameController : MonoBehaviour
         ApplyBattleResult(result);
     }
 
+    private void HandleExplorationInput(string input)
+    {
+        if (!ExplorationCommandParser.TryParseSteps(input, out int steps, out string feedback))
+        {
+            ShowPrompt(feedback ?? "Não entendi quantos passos avançar. Tente novamente.");
+            return;
+        }
+
+        ExplorationMoveResult moveResult = explorationManager.MoveForward(steps);
+
+        AppendNarration(BuildExplorationNarration(moveResult));
+        UpdateExplorationView();
+
+        if (moveResult.EncounteredEnemy && moveResult.EncounterPosition.HasValue)
+        {
+            ShowPrompt("Uma criatura bloqueia seu caminho! Pressione Enter para encará-la.");
+            PrepareBattleFromExploration(moveResult.EncounterPosition.Value);
+        }
+        else
+        {
+            ShowPrompt("Como você avança? (ex: andar 2 passos)");
+        }
+    }
+
+    private void PrepareBattleFromExploration(Vector2Int encounterPosition)
+    {
+        pendingEncounterPosition = encounterPosition;
+
+        enemy = CreateRandomEnemy();
+
+        battleSystem = new BattleSystem(
+            hero,
+            enemy,
+            enemyDodgeChance,
+            enemyCounterChanceOnDodge,
+            playerPerfectBlockChance
+        );
+
+        EnterEnemyIntroState("A criatura encara você, pronta para lutar.");
+    }
+
+    private string BuildExplorationNarration(ExplorationMoveResult moveResult)
+    {
+        if (moveResult.StepsTaken <= 0)
+        {
+            return "Você permanece atento, mas não sai do lugar.";
+        }
+
+        string message = moveResult.StepsTaken == 1
+            ? "Você avança um único passo pelo corredor úmido."
+            : $"Você avança {moveResult.StepsTaken} passos pelos corredores da dungeon.";
+
+        if (moveResult.EncounteredEnemy)
+        {
+            message += "\nUm som estranho ecoa à frente e uma presença hostil surge diante de você!";
+        }
+        else
+        {
+            message += "\nO silêncio persiste enquanto você continua explorando.";
+        }
+
+        return message;
+    }
+
     private BattleRoundResult ExecuteBattleAction(AcaoJogador acao)
     {
         if (battleSystem == null)
@@ -223,9 +313,16 @@ public class GameController : MonoBehaviour
 
         if (result.BattleEnded)
         {
-            currentState = GameState.BattleEnd;
             AppendNarration(result.Message);
-            ShowPrompt("Fim da batalha.", false);
+            if (result.PlayerDied)
+            {
+                currentState = GameState.BattleEnd;
+                ShowPrompt("Fim da batalha.", false);
+            }
+            else
+            {
+                ReturnToExplorationAfterBattle();
+            }
         }
         else
         {
@@ -262,7 +359,8 @@ public class GameController : MonoBehaviour
 
         hero = HeroFactory.CreateHero(pendingHeroName, heroClass);
         hero.ClassKey = heroClass.ToString().ToLowerInvariant();
-        EnterEnemyIntroState();
+        explorationManager.Reset();
+        EnterExplorationState(initialEntry: true);
     }
 
     #endregion
@@ -312,6 +410,28 @@ public class GameController : MonoBehaviour
                 heroStatusText.text = string.Empty;
             }
         }
+    }
+
+    private void UpdateExplorationView()
+    {
+        if (gridView != null && explorationManager != null)
+        {
+            gridView.Render(explorationManager.PlayerPosition, explorationManager.ActiveEnemies);
+        }
+    }
+
+    private void ReturnToExplorationAfterBattle()
+    {
+        if (pendingEncounterPosition.HasValue && explorationManager != null)
+        {
+            explorationManager.RemoveEnemy(pendingEncounterPosition.Value);
+            pendingEncounterPosition = null;
+        }
+
+        battleSystem = null;
+        enemy = null;
+
+        EnterExplorationState();
     }
 
     private void SetPrompt(string text)
