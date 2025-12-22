@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 public static class ExplorationCommandParser
 {
@@ -21,8 +22,9 @@ public static class ExplorationCommandParser
         {"cinco", 5}
     };
 
-    public static bool TryParseSteps(string input, out int steps, out string feedback)
+    public static bool TryParseMove(string input, out Vector2Int direction, out int steps, out string feedback)
     {
+        direction = Vector2Int.zero;
         steps = 0;
         feedback = null;
 
@@ -34,20 +36,19 @@ public static class ExplorationCommandParser
 
         string lower = RemoveAccents(input.ToLowerInvariant());
 
-        if (!lower.Contains("avanc") && !lower.Contains("andar") && !lower.Contains("mover"))
+        if (!ContainsMovementVerb(lower))
         {
             feedback = "Para explorar, descreva quantos passos você quer avançar.";
             return false;
         }
 
+        direction = ParseDirection(lower);
+
         Match match = DigitsRegex.Match(lower);
-        if (match.Success)
+        if (match.Success && int.TryParse(match.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedDigits))
         {
-            if (int.TryParse(match.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
-            {
-                steps = ClampSteps(parsed);
-                return true;
-            }
+            steps = ClampSteps(parsedDigits);
+            return true;
         }
 
         foreach (KeyValuePair<string, int> pair in WordNumbers)
@@ -59,9 +60,45 @@ public static class ExplorationCommandParser
             }
         }
 
-        // Se não encontrar número, assume 1 passo
+        // Sem número explícito -> movimenta um passo
         steps = 1;
         return true;
+    }
+
+    private static bool ContainsMovementVerb(string text)
+    {
+        if (text.Contains("avanc") || text.Contains("andar") || text.Contains("mover") || text.Contains("moviment") || text.Contains("caminh") ||
+            text.Contains("seguir") || text.Contains("prosseguir") || text.Contains("prossiga") || text.Contains("siga") || text.Contains("desloc"))
+        {
+            return true;
+        }
+
+        return text == "ir" || text.StartsWith("ir ") || text.Contains(" ir ") || text.EndsWith(" ir");
+    }
+
+    private static Vector2Int ParseDirection(string text)
+    {
+        if (text.Contains("direita"))
+        {
+            return Vector2Int.right;
+        }
+
+        if (text.Contains("esquerda"))
+        {
+            return Vector2Int.left;
+        }
+
+        if (text.Contains("tras") || text.Contains("trás") || text.Contains("voltar") || text.Contains("retornar"))
+        {
+            return Vector2Int.down;
+        }
+
+        if (text.Contains("cima") || text.Contains("frente") || text.Contains("adiante"))
+        {
+            return Vector2Int.up;
+        }
+
+        return Vector2Int.up;
     }
 
     private static int ClampSteps(int value)

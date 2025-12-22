@@ -23,10 +23,12 @@ public class GridViewController : MonoBehaviour
     [SerializeField] private Color baseColor = Color.black;
     [SerializeField] private Color playerColor = new Color(0.6f, 0f, 0.8f); // Roxo
     [SerializeField] private Color enemyColor = Color.red;
+    [SerializeField] private Color wallColor = Color.gray;
 
     private Image[,] _cells;
     private Vector2Int _playerPosition;
     private readonly HashSet<Vector2Int> _enemyPositions = new HashSet<Vector2Int>();
+    private readonly HashSet<Vector2Int> _obstacles = new HashSet<Vector2Int>();
 
     private void Awake()
     {
@@ -140,6 +142,21 @@ public class GridViewController : MonoBehaviour
         PaintGrid();
     }
 
+    public void SetObstacles(IEnumerable<Vector2Int> obstacles)
+    {
+        _obstacles.Clear();
+
+        if (obstacles != null)
+        {
+            foreach (Vector2Int obstacle in obstacles)
+            {
+                _obstacles.Add(obstacle);
+            }
+        }
+
+        PaintGrid();
+    }
+
 #if UNITY_EDITOR
     [ContextMenu("Render Sample (Editor)")]
     private void RenderSample()
@@ -150,7 +167,13 @@ public class GridViewController : MonoBehaviour
             new Vector2Int(2, 0),
             new Vector2Int(-1, -2)
         };
+            var sampleObstacles = new List<Vector2Int>
+            {
+                new Vector2Int(1, 0),
+                new Vector2Int(0, -1)
+            };
 
+            SetObstacles(sampleObstacles);
         Render(new Vector2Int(0, 0), sampleEnemies);
     }
 #endif
@@ -182,6 +205,10 @@ public class GridViewController : MonoBehaviour
                 else if (_enemyPositions.Contains(worldPos))
                 {
                     color = enemyColor;
+                }
+                else if (_obstacles.Contains(worldPos))
+                {
+                    color = wallColor;
                 }
 
                 _cells[x, y].color = color;

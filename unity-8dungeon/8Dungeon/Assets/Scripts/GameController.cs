@@ -28,6 +28,13 @@ public class GameController : MonoBehaviour
 
     [Header("Exploração")]
     [Range(0f, 1f)] public float encounterChancePerStep = 0.25f;
+    [SerializeField] private Vector2Int[] initialObstacles = new Vector2Int[]
+    {
+        new Vector2Int(2, 0),
+        new Vector2Int(-2, 1),
+        new Vector2Int(0, 2),
+        new Vector2Int(1, -2)
+    };
 
     [Header("Chances de Batalha")]
     [Range(0f, 1f)] public float enemyDodgeChance = 0.2f;
@@ -110,6 +117,7 @@ public class GameController : MonoBehaviour
 
         if (initialEntry)
         {
+            ApplyInitialObstacles();
             SetNarration("Você desperta nos corredores da dungeon, pronto para explorar.");
         }
         else
@@ -217,21 +225,30 @@ public class GameController : MonoBehaviour
 
     private void HandleExplorationInput(string input)
     {
-        if (!ExplorationCommandParser.TryParseSteps(input, out int steps, out string feedback))
+        if (!ExplorationCommandParser.TryParseMove(input, out Vector2Int direction, out int steps, out string feedback))
         {
             ShowPrompt(feedback ?? "Não entendi quantos passos avançar. Tente novamente.");
             return;
         }
 
-        ExplorationMoveResult moveResult = explorationManager.MoveForward(steps);
+        ExplorationMoveResult moveResult = explorationManager.Move(direction, steps);
 
         AppendNarration(BuildExplorationNarration(moveResult));
         UpdateExplorationView();
 
-        if (moveResult.EncounteredEnemy && moveResult.EncounterPosition.HasValue)
+        if (moveResult.ShouldStartBattle && moveResult.BattlePosition.HasValue)
         {
-            ShowPrompt("Uma criatura bloqueia seu caminho! Pressione Enter para encará-la.");
-            PrepareBattleFromExploration(moveResult.EncounterPosition.Value);
+            string prompt = moveResult.EncounteredEnemy
+                ? "Uma criatura bloqueia seu caminho! Pressione Enter para encará-la."
+                : "O inimigo alcança você! Pressione Enter para reagir.";
+
+            ShowPrompt(prompt);
+
+            string introMessage = moveResult.EncounteredEnemy
+                ? "Uma criatura bloqueia seu caminho, rosnando diante de você."
+                : "O inimigo que o perseguia ataca sem aviso.";
+
+            PrepareBattleFromExploration(moveResult.BattlePosition.Value, introMessage);
         }
         else
         {
@@ -239,7 +256,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void PrepareBattleFromExploration(Vector2Int encounterPosition)
+    private void PrepareBattleFromExploration(Vector2Int encounterPosition, string introMessage = null)
     {
         pendingEncounterPosition = encounterPosition;
 
@@ -253,23 +270,38 @@ public class GameController : MonoBehaviour
             playerPerfectBlockChance
         );
 
-        EnterEnemyIntroState("A criatura encara você, pronta para lutar.");
+        string intro = string.IsNullOrWhiteSpace(introMessage)
+            ? "A criatura encara você, pronta para lutar."
+            : introMessage;
+
+        EnterEnemyIntroState(intro);
     }
 
     private string BuildExplorationNarration(ExplorationMoveResult moveResult)
     {
         if (moveResult.StepsTaken <= 0)
         {
-            return "Você permanece atento, mas não sai do lugar.";
+            return moveResult.BlockedByObstacle
+                ? "Você tenta avançar, mas uma parede antiga bloqueia seu caminho."
+                : "Você permanece atento, mas não sai do lugar.";
         }
 
         string message = moveResult.StepsTaken == 1
             ? "Você avança um único passo pelo corredor úmido."
             : $"Você avança {moveResult.StepsTaken} passos pelos corredores da dungeon.";
 
+        if (moveResult.BlockedByObstacle)
+        {
+            message += "\nSeu avanço é interrompido por uma parede irregular de pedra.";
+        }
+
         if (moveResult.EncounteredEnemy)
         {
             message += "\nUm som estranho ecoa à frente e uma presença hostil surge diante de você!";
+        }
+        else if (moveResult.ProximityTriggered)
+        {
+            message += "\nUma criatura próxima investe, tentando encurralá-lo!";
         }
         else
         {
@@ -416,7 +448,25 @@ public class GameController : MonoBehaviour
     {
         if (gridView != null && explorationManager != null)
         {
+            gridView.SetObstacles(explorationManager.Obstacles);
             gridView.Render(explorationManager.PlayerPosition, explorationManager.ActiveEnemies);
+        }
+    }
+
+    private void ApplyInitialObstacles()
+    {
+        if (explorationManager == null)
+        {
+            return;
+        }
+
+        if (initialObstacles != null && initialObstacles.Length > 0)
+        {
+            explorationManager.SetObstacles(initialObstacles);
+        }
+        else
+        {
+            explorationManager.SetObstacles(null);
         }
     }
 
