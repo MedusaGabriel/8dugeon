@@ -4,8 +4,25 @@ using UnityEngine;
 public class ExplorationManager
 {
     private readonly float _encounterChancePerStep;
+    private readonly float _wallSpawnChance;
+    private readonly float _ambientEnemySpawnChance;
+    private readonly int _ambientEnemySpawnRadius;
+    private readonly int _maxAmbientEnemies;
+    private readonly int _randomSpawnRange;
+    private readonly int _visionRadiusX;
+    private readonly int _visionRadiusY;
+
     private readonly HashSet<Vector2Int> _activeEnemies = new HashSet<Vector2Int>();
     private readonly HashSet<Vector2Int> _obstacles = new HashSet<Vector2Int>();
+    private readonly Dictionary<Vector2Int, TileData> _tiles = new Dictionary<Vector2Int, TileData>();
+
+    private int _dungeonSeed;
+
+    private struct TileData
+    {
+        public bool Generated;
+        public bool IsWall;
+    }
 
     public Vector2Int PlayerPosition { get; private set; } = Vector2Int.zero;
     public IReadOnlyCollection<Vector2Int> ActiveEnemies => _activeEnemies;
@@ -13,14 +30,65 @@ public class ExplorationManager
 
     private const int MaxStepsPerMove = 5;
     private const int BattleProximityRange = 1; // 3x3 ao redor do player
+    private const int MaxAmbientSpawnAttempts = 12;
 
-    public ExplorationManager(float encounterChancePerStep)
+    public ExplorationManager(
+        float encounterChancePerStep,
+        float wallSpawnChance,
+        float ambientEnemySpawnChance,
+        int ambientEnemySpawnRadius,
+        int maxAmbientEnemies,
+        int randomSpawnRange,
+        int visionRadiusX,
+        int visionRadiusY)
     {
         _encounterChancePerStep = Mathf.Clamp01(encounterChancePerStep);
+        _wallSpawnChance = Mathf.Clamp01(wallSpawnChance);
+        _ambientEnemySpawnChance = Mathf.Clamp01(ambientEnemySpawnChance);
+        _ambientEnemySpawnRadius = Mathf.Max(1, ambientEnemySpawnRadius);
+        _maxAmbientEnemies = Mathf.Max(1, maxAmbientEnemies);
+        _randomSpawnRange = Mathf.Max(1, randomSpawnRange);
+        _visionRadiusX = Mathf.Max(1, visionRadiusX);
+        _visionRadiusY = Mathf.Max(1, visionRadiusY);
+    }
+
+    public void Reset(bool randomizeStartPosition)
+    {
+        _activeEnemies.Clear();
+        _obstacles.Clear();
+        _tiles.Clear();
+
+        _dungeonSeed = UnityEngine.Random.Range(0, int.MaxValue);
+
+        PlayerPosition = randomizeStartPosition ? GenerateRandomStartPosition() : Vector2Int.zero;
+
+        PrefillAround(PlayerPosition, Vector2Int.zero, allowEnemySpawn: false);
+    }
+
+    public void Reset()
+    {
+        Reset(randomizeStartPosition: false);
+    }
+
+    public void EnsureCurrentTileGenerated()
+    {
+        PrefillAround(PlayerPosition, Vector2Int.zero, allowEnemySpawn: false);
     }
 
     public void SetObstacles(IEnumerable<Vector2Int> positions)
     {
+        List<Vector2Int> existingKeys = new List<Vector2Int>(_tiles.Keys);
+
+        foreach (Vector2Int key in existingKeys)
+        {
+            TileData data = _tiles[key];
+            if (data.IsWall)
+            {
+                data.IsWall = false;
+                _tiles[key] = data;
+            }
+        }
+
         _obstacles.Clear();
 
         if (positions == null)
@@ -30,17 +98,23 @@ public class ExplorationManager
 
         foreach (Vector2Int pos in positions)
         {
+            if (pos == PlayerPosition)
+            {
+                continue;
+            }
+
+            TileData data = _tiles.ContainsKey(pos) ? _tiles[pos] : new TileData { Generated = true };
+            data.Generated = true;
+            data.IsWall = true;
+            _tiles[pos] = data;
             _obstacles.Add(pos);
         }
     }
 
     public ExplorationMoveResult Move(Vector2Int direction, int requestedSteps)
     {
-        Vector2Int clampedDirection = new Vector2Int(Mathf.Clamp(direction.x, -1, 1), Mathf.Clamp(direction.y, -1, 1));
-        if (clampedDirection == Vector2Int.zero)
-        {
-            clampedDirection = Vector2Int.up;
-        }
+        Vector2Int clampedDirection = ClampDirection(direction, fallbackUp: true);
+        PrefillAround(PlayerPosition, clampedDirection);
 
         int stepsToTake = Mathf.Clamp(requestedSteps, 1, MaxStepsPerMove);
         int stepsTaken = 0;
@@ -50,6 +124,9 @@ public class ExplorationManager
         for (int i = 0; i < stepsToTake; i++)
         {
             Vector2Int next = PlayerPosition + clampedDirection;
+
+            GenerateTile(next, forceEmpty: false);
+
             if (_obstacles.Contains(next))
             {
                 blockedByObstacle = true;
@@ -58,6 +135,8 @@ public class ExplorationManager
 
             PlayerPosition = next;
             stepsTaken++;
+
+            PrefillAround(PlayerPosition, clampedDirection);
 
             if (UnityEngine.Random.value <= _encounterChancePerStep)
             {
@@ -70,9 +149,10 @@ public class ExplorationManager
         bool proximityTriggered = false;
         Vector2Int? battlePosition = encounterPosition;
 
+        MoveEnemiesTowardPlayer();
+
         if (!encounterPosition.HasValue)
         {
-            MoveEnemiesTowardPlayer();
             if (TryFindEnemyInRange(out Vector2Int enemyInRange))
             {
                 proximityTriggered = true;
@@ -109,6 +189,8 @@ public class ExplorationManager
         {
             Vector2Int target = ChooseEnemyStep(enemy);
 
+            GenerateTile(target, forceEmpty: false);
+
             if (_obstacles.Contains(target) || updated.Contains(target))
             {
                 target = enemy;
@@ -130,7 +212,6 @@ public class ExplorationManager
         int stepX = delta.x == 0 ? 0 : (delta.x > 0 ? 1 : -1);
         int stepY = delta.y == 0 ? 0 : (delta.y > 0 ? 1 : -1);
 
-        // prefere mover no eixo de maior distância; se igual, move diagonalmente
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
         {
             return enemy + new Vector2Int(stepX, 0);
@@ -165,10 +246,153 @@ public class ExplorationManager
         _activeEnemies.Remove(position);
     }
 
-    public void Reset()
+    private void PrefillAround(Vector2Int center, Vector2Int forwardDir, bool allowEnemySpawn = true)
     {
-        PlayerPosition = Vector2Int.zero;
-        _activeEnemies.Clear();
+        Vector2Int normalizedForward = ClampDirection(forwardDir, fallbackUp: false);
+
+        GenerateTile(center, forceEmpty: true);
+
+        for (int dx = -_visionRadiusX; dx <= _visionRadiusX; dx++)
+        {
+            for (int dy = -_visionRadiusY; dy <= _visionRadiusY; dy++)
+            {
+                if (dx == 0 && dy == 0)
+                {
+                    continue;
+                }
+
+                Vector2Int offset = new Vector2Int(dx, dy);
+                Vector2Int candidate = center + offset;
+
+                bool immediateNeighbor = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) == 1;
+                bool keepOpen = immediateNeighbor && normalizedForward != Vector2Int.zero &&
+                                (offset == normalizedForward || offset == -normalizedForward);
+
+                GenerateTile(candidate, forceEmpty: keepOpen && immediateNeighbor);
+            }
+        }
+
+        if (allowEnemySpawn)
+        {
+            TrySpawnAmbientEnemyNear(center);
+        }
+    }
+
+    private void TrySpawnAmbientEnemyNear(Vector2Int center)
+    {
+        if (_activeEnemies.Count >= _maxAmbientEnemies)
+        {
+            return;
+        }
+
+        if (UnityEngine.Random.value > _ambientEnemySpawnChance)
+        {
+            return;
+        }
+
+        for (int attempt = 0; attempt < MaxAmbientSpawnAttempts; attempt++)
+        {
+            int offsetX = UnityEngine.Random.Range(-_ambientEnemySpawnRadius, _ambientEnemySpawnRadius + 1);
+            int offsetY = UnityEngine.Random.Range(-_ambientEnemySpawnRadius, _ambientEnemySpawnRadius + 1);
+
+            if (offsetX == 0 && offsetY == 0)
+            {
+                continue;
+            }
+
+            Vector2Int candidate = center + new Vector2Int(offsetX, offsetY);
+
+            GenerateTile(candidate, forceEmpty: false);
+
+            if (_obstacles.Contains(candidate) || _activeEnemies.Contains(candidate) || candidate == PlayerPosition)
+            {
+                continue;
+            }
+
+            if (Mathf.Abs(candidate.x - PlayerPosition.x) <= 1 && Mathf.Abs(candidate.y - PlayerPosition.y) <= 1)
+            {
+                continue; // evita spawn imediato ao lado do jogador
+            }
+
+            _activeEnemies.Add(candidate);
+            break;
+        }
+    }
+
+    private TileData GenerateTile(Vector2Int position, bool forceEmpty)
+    {
+        TileData data;
+
+        if (_tiles.TryGetValue(position, out data))
+        {
+            if (forceEmpty && data.IsWall)
+            {
+                data.IsWall = false;
+            }
+        }
+        else
+        {
+            data = new TileData
+            {
+                Generated = true,
+                IsWall = !forceEmpty && ShouldPlaceWall(position)
+            };
+        }
+
+        data.Generated = true;
+        _tiles[position] = data;
+
+        if (data.IsWall)
+        {
+            _obstacles.Add(position);
+        }
+        else
+        {
+            _obstacles.Remove(position);
+        }
+
+        return data;
+    }
+
+    private bool ShouldPlaceWall(Vector2Int position)
+    {
+        if (position == PlayerPosition)
+        {
+            return false;
+        }
+
+        float sample = Deterministic01(position);
+        return sample < _wallSpawnChance;
+    }
+
+    private float Deterministic01(Vector2Int position)
+    {
+        int hash = position.x * 374761393 + position.y * 668265263 + _dungeonSeed * 700001;
+        hash = (hash ^ (hash >> 13)) * 1274126177;
+        hash ^= hash >> 16;
+
+        int masked = hash & 0x7FFFFFFF;
+        return masked / (float)int.MaxValue;
+    }
+
+    private Vector2Int ClampDirection(Vector2Int direction, bool fallbackUp)
+    {
+        int x = Mathf.Clamp(direction.x, -1, 1);
+        int y = Mathf.Clamp(direction.y, -1, 1);
+
+        if (x == 0 && y == 0)
+        {
+            return fallbackUp ? Vector2Int.up : Vector2Int.zero;
+        }
+
+        return new Vector2Int(x, y);
+    }
+
+    private Vector2Int GenerateRandomStartPosition()
+    {
+        int x = UnityEngine.Random.Range(-_randomSpawnRange, _randomSpawnRange + 1);
+        int y = UnityEngine.Random.Range(-_randomSpawnRange, _randomSpawnRange + 1);
+        return new Vector2Int(x, y);
     }
 }
 

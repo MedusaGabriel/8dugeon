@@ -28,13 +28,22 @@ public class GameController : MonoBehaviour
 
     [Header("Exploração")]
     [Range(0f, 1f)] public float encounterChancePerStep = 0.25f;
-    [SerializeField] private Vector2Int[] initialObstacles = new Vector2Int[]
-    {
-        new Vector2Int(2, 0),
-        new Vector2Int(-2, 1),
-        new Vector2Int(0, 2),
-        new Vector2Int(1, -2)
-    };
+    [Range(0f, 1f)] public float proceduralWallChance = 0.35f;
+    [Range(0f, 1f)] public float roamingEnemySpawnChance = 0.15f;
+    [SerializeField, Min(1)] private int roamingEnemySpawnRadius = 4;
+    [SerializeField, Min(1)] private int maxRoamingEnemies = 5;
+    [SerializeField, Min(1)] private int randomSpawnRange = 4;
+    [SerializeField, Min(1)] private int explorationVisionRadiusX = 4;
+    [SerializeField, Min(1)] private int explorationVisionRadiusY = 2;
+
+    [Header("Guias de Movimento")]
+    [TextArea]
+    [SerializeField] private string defaultMovementExamples =
+        "Exemplos de movimentos:\n" +
+        "- andar 1 passo para frente\n" +
+        "- andar 1 passo para a esquerda\n" +
+        "- andar 1 passo para a direita\n" +
+        "- retornar 1 passo";
 
     [Header("Chances de Batalha")]
     [Range(0f, 1f)] public float enemyDodgeChance = 0.2f;
@@ -66,7 +75,15 @@ public class GameController : MonoBehaviour
     {
         Random.InitState(System.Environment.TickCount);
         hero = null;
-        explorationManager = new ExplorationManager(encounterChancePerStep);
+        explorationManager = new ExplorationManager(
+            encounterChancePerStep,
+            proceduralWallChance,
+            roamingEnemySpawnChance,
+            roamingEnemySpawnRadius,
+            maxRoamingEnemies,
+            randomSpawnRange,
+            explorationVisionRadiusX,
+            explorationVisionRadiusY);
         TrySubscribeToNarration();
         EnterHeroNameState();
     }
@@ -112,16 +129,25 @@ public class GameController : MonoBehaviour
 
         if (explorationManager == null)
         {
-            explorationManager = new ExplorationManager(encounterChancePerStep);
+            explorationManager = new ExplorationManager(
+                encounterChancePerStep,
+                proceduralWallChance,
+                roamingEnemySpawnChance,
+                roamingEnemySpawnRadius,
+                maxRoamingEnemies,
+                randomSpawnRange,
+                explorationVisionRadiusX,
+                explorationVisionRadiusY);
         }
 
         if (initialEntry)
         {
-            ApplyInitialObstacles();
+            explorationManager.Reset(randomizeStartPosition: true);
             SetNarration("Você desperta nos corredores da dungeon, pronto para explorar.");
         }
         else
         {
+            explorationManager.EnsureCurrentTileGenerated();
             AppendNarration("Você retoma a exploração pelos corredores.");
         }
 
@@ -391,7 +417,6 @@ public class GameController : MonoBehaviour
 
         hero = HeroFactory.CreateHero(pendingHeroName, heroClass);
         hero.ClassKey = heroClass.ToString().ToLowerInvariant();
-        explorationManager.Reset();
         EnterExplorationState(initialEntry: true);
     }
 
@@ -450,23 +475,6 @@ public class GameController : MonoBehaviour
         {
             gridView.SetObstacles(explorationManager.Obstacles);
             gridView.Render(explorationManager.PlayerPosition, explorationManager.ActiveEnemies);
-        }
-    }
-
-    private void ApplyInitialObstacles()
-    {
-        if (explorationManager == null)
-        {
-            return;
-        }
-
-        if (initialObstacles != null && initialObstacles.Length > 0)
-        {
-            explorationManager.SetObstacles(initialObstacles);
-        }
-        else
-        {
-            explorationManager.SetObstacles(null);
         }
     }
 
@@ -554,6 +562,21 @@ public class GameController : MonoBehaviour
     private void ClearNarration()
     {
         narrationFeed?.Clear();
+    }
+
+    public void ShowMovementExamples()
+    {
+        ShowMovementExamples(defaultMovementExamples);
+    }
+
+    public void ShowMovementExamples(string message)
+    {
+        string text = string.IsNullOrWhiteSpace(message) ? defaultMovementExamples : message;
+        AppendNarration(text);
+        if (currentState == GameState.Exploration)
+        {
+            ShowPrompt("Digite seu comando de movimento.");
+        }
     }
 
 
