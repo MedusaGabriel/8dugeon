@@ -194,7 +194,7 @@ public class GridViewController : MonoBehaviour
             {
                 Vector2Int worldPos = new Vector2Int(
                     _playerPosition.x + (x - centerX),
-                    _playerPosition.y + (y - centerY));
+                    _playerPosition.y + (centerY - y));
 
                 Color color = baseColor;
 

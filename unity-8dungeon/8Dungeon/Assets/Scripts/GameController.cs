@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text;
 using UnityEngine;
 using TMPro;
@@ -50,6 +51,9 @@ public class GameController : MonoBehaviour
     [Range(0f, 1f)] public float enemyCounterChanceOnDodge = 0.5f;
     [Range(0f, 1f)] public float playerPerfectBlockChance = 0.6f;
 
+    [Header("Narração")]
+    [SerializeField, Range(0f, 0.1f)] private float narrationCharDelay = 0.03f;
+
     private GameState currentState;
     private HeroStats hero;
     private EnemyStats enemy;
@@ -66,7 +70,7 @@ public class GameController : MonoBehaviour
             commandInput.onSubmit.AddListener(HandleCommandSubmitted);
         }
 
-        narrationFeed = new NarrationFeed(narrationText);
+        narrationFeed = new NarrationFeed(narrationText, this, narrationCharDelay);
         TrySubscribeToNarration();
     }
 
@@ -152,6 +156,7 @@ public class GameController : MonoBehaviour
         }
 
         UpdateExplorationView();
+        UpdateStatusUI();
         ShowPrompt("Como você avança? (ex: andar 2 passos)");
     }
 
@@ -176,6 +181,20 @@ public class GameController : MonoBehaviour
 
     private void HandleCommandSubmitted(string rawInput)
     {
+        if (narrationFeed != null && narrationFeed.IsTyping)
+        {
+            narrationFeed.Skip();
+
+            if (commandInput != null)
+            {
+                commandInput.ActivateInputField();
+                commandInput.Select();
+            }
+
+            return;
+        }
+
+        ClearNarrationBeforeCommand();
         ProcessCommand(rawInput);
     }
 
@@ -564,6 +583,14 @@ public class GameController : MonoBehaviour
         narrationFeed?.Clear();
     }
 
+    private void ClearNarrationBeforeCommand()
+    {
+        if (currentState == GameState.Exploration || currentState == GameState.PlayerTurn)
+        {
+            ClearNarration();
+        }
+    }
+
     public void ShowMovementExamples()
     {
         ShowMovementExamples(defaultMovementExamples);
@@ -585,17 +612,28 @@ public class GameController : MonoBehaviour
     private sealed class NarrationFeed
     {
         private readonly TMP_Text _target;
+        private readonly MonoBehaviour _owner;
+        private readonly float _charDelay;
         private readonly StringBuilder _buffer = new StringBuilder();
+        private Coroutine _typingRoutine;
+        private string _currentText = string.Empty;
+        private bool _skipRequested;
 
-        public NarrationFeed(TMP_Text target)
+        public bool IsTyping => _typingRoutine != null;
+
+        public NarrationFeed(TMP_Text target, MonoBehaviour owner, float charDelay)
         {
             _target = target;
-            Refresh();
+            _owner = owner;
+            _charDelay = Mathf.Max(0f, charDelay);
+            RefreshImmediate();
         }
 
         public void Set(string text)
         {
             _buffer.Clear();
+            StopTyping();
+            _skipRequested = false;
             AppendInternal(text, false);
         }
 
@@ -607,13 +645,30 @@ public class GameController : MonoBehaviour
         public void Clear()
         {
             _buffer.Clear();
-            Refresh();
+            _currentText = string.Empty;
+            StopTyping();
+            _skipRequested = false;
+            RefreshImmediate();
+        }
+
+        public void Skip()
+        {
+            if (!IsTyping)
+            {
+                return;
+            }
+
+            _skipRequested = true;
         }
 
         private void AppendInternal(string text, bool separate)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
+                if (_buffer.Length == 0)
+                {
+                    RefreshImmediate();
+                }
                 return;
             }
 
@@ -623,10 +678,79 @@ public class GameController : MonoBehaviour
             }
 
             _buffer.Append(text);
-            Refresh();
+            StartTyping();
         }
 
-        private void Refresh()
+        private void StartTyping()
+        {
+            if (_target == null)
+            {
+                return;
+            }
+
+            _currentText = _buffer.ToString();
+
+            if (string.IsNullOrEmpty(_currentText))
+            {
+                RefreshImmediate();
+                return;
+            }
+
+            if (_owner == null || _charDelay <= 0f)
+            {
+                StopTyping();
+                _target.text = _currentText;
+                return;
+            }
+
+            StopTyping();
+            _target.text = string.Empty;
+            _skipRequested = false;
+            _typingRoutine = _owner.StartCoroutine(TypeRoutine(_currentText));
+        }
+
+        private IEnumerator TypeRoutine(string fullText)
+        {
+            WaitForSeconds wait = _charDelay > 0f ? new WaitForSeconds(_charDelay) : null;
+
+            for (int i = 0; i < fullText.Length; i++)
+            {
+                if (_skipRequested)
+                {
+                    break;
+                }
+
+                _target.text = fullText.Substring(0, i + 1);
+
+                if (i < fullText.Length - 1)
+                {
+                    if (wait != null)
+                    {
+                        yield return wait;
+                    }
+                    else
+                    {
+                        yield return null;
+                    }
+                }
+            }
+
+            _target.text = fullText;
+            _skipRequested = false;
+            _typingRoutine = null;
+        }
+
+        private void StopTyping()
+        {
+            if (_typingRoutine != null && _owner != null)
+            {
+                _owner.StopCoroutine(_typingRoutine);
+            }
+
+            _typingRoutine = null;
+        }
+
+        private void RefreshImmediate()
         {
             if (_target != null)
             {

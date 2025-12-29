@@ -267,8 +267,15 @@ public class ExplorationManager
                 bool immediateNeighbor = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) == 1;
                 bool keepOpen = immediateNeighbor && normalizedForward != Vector2Int.zero &&
                                 (offset == normalizedForward || offset == -normalizedForward);
+                bool existingWall = false;
+                if (_tiles.TryGetValue(candidate, out TileData existingData))
+                {
+                    existingWall = existingData.IsWall;
+                }
 
-                GenerateTile(candidate, forceEmpty: keepOpen && immediateNeighbor);
+                bool forceEmpty = keepOpen && immediateNeighbor && !existingWall;
+
+                GenerateTile(candidate, forceEmpty: forceEmpty);
             }
         }
 
